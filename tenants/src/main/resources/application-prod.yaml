@@ -1,0 +1,9 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    jdbc:
+      url: ${DATABASE_URL}
+  flyway:
+    enabled: ${MIGRATION_ENABLED:true}

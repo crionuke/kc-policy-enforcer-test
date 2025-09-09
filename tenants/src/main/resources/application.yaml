@@ -1,0 +1,22 @@
+quarkus:
+  application:
+    name: tenants
+  datasource:
+    db-kind: postgresql
+  hibernate-orm:
+    database:
+      generation: none
+    mapping:
+      format:
+        global: ignore
+  flyway:
+    migrate-at-start: true
+  container-image:
+    group: omgservers
+    name: tenants
+    build: true
+  swagger-ui:
+    always-include: true
+  smallrye-openapi:
+    servers: http://localhost:8080
+    store-schema-directory: target/openapi
