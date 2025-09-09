@@ -1,3 +1,12 @@
+create table if not exists event (
+    id uuid primary key,
+    created timestamp with time zone not null,
+    modified timestamp with time zone not null,
+    qualifier text not null,
+    resource_id uuid not null,
+    deleted boolean not null
+);
+
 create table if not exists tenant (
     id uuid primary key,
     created timestamp with time zone not null,

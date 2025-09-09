@@ -1,5 +1,6 @@
 package com.omgservers.tenants.project;
 
+import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.tenant.Tenant;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -18,6 +19,12 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
+
+    final EventService eventService;
+
+    public ProjectResource(final EventService eventService) {
+        this.eventService = eventService;
+    }
 
     @GET
     @Path("/{id}")
@@ -39,6 +46,9 @@ public class ProjectResource {
         project.status = ProjectStatus.CREATING;
         project.config = newProject.config;
         project.persist();
+
+        eventService.projectCreated(project.id);
+        
         return project;
     }
 }

@@ -1,5 +1,6 @@
 package com.omgservers.tenants.version;
 
+import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.project.Project;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -18,6 +19,12 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class VersionResource {
+
+    final EventService eventService;
+
+    public VersionResource(final EventService eventService) {
+        this.eventService = eventService;
+    }
 
     @GET
     @Path("/{id}")
@@ -41,6 +48,9 @@ public class VersionResource {
         version.status = VersionStatus.CREATING;
         version.config = newVersion.config;
         version.persist();
+
+        eventService.versionCreated(version.id);
+        
         return version;
     }
 }

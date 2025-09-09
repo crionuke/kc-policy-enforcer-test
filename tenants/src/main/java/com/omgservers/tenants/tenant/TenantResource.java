@@ -1,5 +1,6 @@
 package com.omgservers.tenants.tenant;
 
+import com.omgservers.tenants.event.EventService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +17,12 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 public class TenantResource {
 
+    final EventService eventService;
+
+    public TenantResource(final EventService eventService) {
+        this.eventService = eventService;
+    }
+
     @GET
     @Path("/{id}")
     public Tenant getById(@NotNull final UUID id) {
@@ -31,6 +38,9 @@ public class TenantResource {
         tenant.status = TenantStatus.CREATING;
         tenant.config = newTenant.config;
         tenant.persist();
+
+        eventService.tenantCreated(tenant.id);
+        
         return tenant;
     }
 }

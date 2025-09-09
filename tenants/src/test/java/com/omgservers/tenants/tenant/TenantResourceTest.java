@@ -1,11 +1,15 @@
 package com.omgservers.tenants.tenant;
 
+import com.omgservers.tenants.event.Event;
+import com.omgservers.tenants.event.EventQualifier;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -17,6 +21,8 @@ import static org.hamcrest.Matchers.notNullValue;
 @ApplicationScoped
 @TestHTTPEndpoint(TenantResource.class)
 public class TenantResourceTest {
+
+    private static final Logger log = LoggerFactory.getLogger(TenantResourceTest.class);
 
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public Tenant persistTestTenant(final TenantStatus status) {
@@ -64,7 +70,7 @@ public class TenantResourceTest {
         newTenant.name = "New tenant";
         newTenant.config = createTenantConfig();
 
-        given()
+        final var tenant = given()
                 .contentType(ContentType.JSON)
                 .body(newTenant)
                 .when()
@@ -76,7 +82,10 @@ public class TenantResourceTest {
                 .body("id", notNullValue())
                 .body("name", equalTo(newTenant.name))
                 .body("status", equalTo(TenantStatus.CREATING.toString()))
-                .body("config", notNullValue());
+                .body("config", notNullValue())
+                .extract().as(Tenant.class);
+
+        Event.findFirstRequired(EventQualifier.TENANT_CREATED, tenant.id);
     }
 
     @Test

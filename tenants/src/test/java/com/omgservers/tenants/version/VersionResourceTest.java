@@ -1,9 +1,10 @@
 package com.omgservers.tenants.version;
 
+import com.omgservers.tenants.event.Event;
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.project.Project;
 import com.omgservers.tenants.project.ProjectResourceTest;
 import com.omgservers.tenants.project.ProjectStatus;
-import com.omgservers.tenants.tenant.Tenant;
 import com.omgservers.tenants.tenant.TenantResourceTest;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -84,7 +85,7 @@ public class VersionResourceTest {
         newVersion.patch = 0L;
         newVersion.config = createVersionConfig();
 
-        given()
+        final var version = given()
                 .contentType(ContentType.JSON)
                 .body(newVersion)
                 .when()
@@ -98,7 +99,10 @@ public class VersionResourceTest {
                 .body("minor", equalTo(newVersion.minor.intValue()))
                 .body("patch", equalTo(newVersion.patch.intValue()))
                 .body("status", equalTo(VersionStatus.CREATING.toString()))
-                .body("config", notNullValue());
+                .body("config", notNullValue())
+                .extract().as(Version.class);
+
+        Event.findFirstRequired(EventQualifier.VERSION_CREATED, version.id);
     }
 
     @Test

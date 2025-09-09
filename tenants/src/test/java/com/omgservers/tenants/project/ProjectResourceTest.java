@@ -1,5 +1,7 @@
 package com.omgservers.tenants.project;
 
+import com.omgservers.tenants.event.Event;
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.tenant.Tenant;
 import com.omgservers.tenants.tenant.TenantResourceTest;
 import com.omgservers.tenants.tenant.TenantStatus;
@@ -76,7 +78,7 @@ public class ProjectResourceTest {
         newProject.name = "New project";
         newProject.config = createProjectConfig();
 
-        given()
+        final var project = given()
                 .contentType(ContentType.JSON)
                 .body(newProject)
                 .when()
@@ -88,7 +90,10 @@ public class ProjectResourceTest {
                 .body("id", notNullValue())
                 .body("name", equalTo(newProject.name))
                 .body("status", equalTo(ProjectStatus.CREATING.toString()))
-                .body("config", notNullValue());
+                .body("config", notNullValue())
+                .extract().as(Project.class);
+
+        Event.findFirstRequired(EventQualifier.PROJECT_CREATED, project.id);
     }
 
     @Test

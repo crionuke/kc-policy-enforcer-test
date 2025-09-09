@@ -76,6 +76,7 @@ Multiple Dockerfile variants available in `tenants/src/main/docker/`:
 - `Dockerfile.native-micro`: Minimal native container
 - `Dockerfile.legacy-jar`: Legacy JAR format container
 
-## Java Code Style
+## Java Tips
 
+- No comments are required in the code.
 - The desirable way to define a local variable is final var name = ...

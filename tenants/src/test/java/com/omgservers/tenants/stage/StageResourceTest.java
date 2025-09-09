@@ -1,5 +1,7 @@
 package com.omgservers.tenants.stage;
 
+import com.omgservers.tenants.event.Event;
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.tenant.Tenant;
 import com.omgservers.tenants.tenant.TenantResourceTest;
 import com.omgservers.tenants.tenant.TenantStatus;
@@ -70,7 +72,7 @@ public class StageResourceTest {
         newStage.name = "New stage";
         newStage.config = createStageConfig();
 
-        given()
+        final var stage = given()
                 .contentType(ContentType.JSON)
                 .body(newStage)
                 .when()
@@ -82,7 +84,10 @@ public class StageResourceTest {
                 .body("id", notNullValue())
                 .body("name", equalTo(newStage.name))
                 .body("status", equalTo(StageStatus.CREATING.toString()))
-                .body("config", notNullValue());
+                .body("config", notNullValue())
+                .extract().as(Stage.class);
+
+        Event.findFirstRequired(EventQualifier.STAGE_CREATED, stage.id);
     }
 
     @Test
