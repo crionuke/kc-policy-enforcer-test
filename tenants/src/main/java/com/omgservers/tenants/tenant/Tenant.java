@@ -14,7 +14,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tenant")
+@Table(name = "omgtenants_tenant")
 public class Tenant extends BaseEntity {
 
     public static Tenant findByIdRequired(final UUID tenantId) {

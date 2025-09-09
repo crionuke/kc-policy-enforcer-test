@@ -20,3 +20,8 @@ quarkus:
   smallrye-openapi:
     servers: http://localhost:8080
     store-schema-directory: target/openapi
+  scheduler:
+    start-mode: forced
+  quartz:
+    clustered: false
+

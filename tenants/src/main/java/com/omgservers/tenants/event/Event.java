@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "event")
+@Table(name = "omgtenants_event")
 public class Event extends BaseEntity {
 
     public static Event findFirstRequired(final EventQualifier qualifier, final UUID resourceId) {

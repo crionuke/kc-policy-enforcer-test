@@ -1,4 +1,4 @@
-create table if not exists event (
+create table if not exists omgtenants_event (
     id uuid primary key,
     created timestamp with time zone not null,
     modified timestamp with time zone not null,
@@ -7,7 +7,7 @@ create table if not exists event (
     deleted boolean not null
 );
 
-create table if not exists tenant (
+create table if not exists omgtenants_tenant (
     id uuid primary key,
     created timestamp with time zone not null,
     modified timestamp with time zone not null,
@@ -17,22 +17,22 @@ create table if not exists tenant (
     deleted boolean not null
 );
 
-create table if not exists project (
+create table if not exists omgtenants_project (
     id uuid primary key,
     created timestamp with time zone not null,
     modified timestamp with time zone not null,
-    tenant_id uuid not null references tenant(id) on delete restrict on update restrict,
+    tenant_id uuid not null references omgtenants_tenant(id) on delete restrict on update restrict,
     name text not null,
     status text not null,
     config jsonb not null,
     deleted boolean not null
 );
 
-create table if not exists version (
+create table if not exists omgtenants_version (
     id uuid primary key,
     created timestamp with time zone not null,
     modified timestamp with time zone not null,
-    project_id uuid not null references project(id) on delete restrict on update restrict,
+    project_id uuid not null references omgtenants_project(id) on delete restrict on update restrict,
     major bigint not null,
     minor bigint not null,
     patch bigint not null,
@@ -41,11 +41,11 @@ create table if not exists version (
     deleted boolean not null
 );
 
-create table if not exists stage (
+create table if not exists omgtenants_stage (
     id uuid primary key,
     created timestamp with time zone not null,
     modified timestamp with time zone not null,
-    tenant_id uuid not null references tenant(id) on delete restrict on update restrict,
+    tenant_id uuid not null references omgtenants_tenant(id) on delete restrict on update restrict,
     name text not null,
     status text not null,
     config jsonb not null,

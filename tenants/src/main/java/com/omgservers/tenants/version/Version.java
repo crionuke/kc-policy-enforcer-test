@@ -16,7 +16,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
-@Table(name = "version")
+@Table(name = "omgtenants_version")
 public class Version extends BaseEntity {
 
     public static Version findByIdRequired(final UUID versionId) {

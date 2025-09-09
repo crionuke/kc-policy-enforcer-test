@@ -16,7 +16,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
-@Table(name = "stage")
+@Table(name = "omgtenants_stage")
 public class Stage extends BaseEntity {
 
     public static Stage findByIdRequired(final UUID stageId) {

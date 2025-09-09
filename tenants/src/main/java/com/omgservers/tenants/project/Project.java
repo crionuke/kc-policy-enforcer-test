@@ -17,7 +17,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
-@Table(name = "project")
+@Table(name = "omgtenants_project")
 public class Project extends BaseEntity {
 
     public static Project findByIdRequired(final UUID projectId) {
