@@ -4,6 +4,7 @@ import com.omgservers.tenants.event.EventService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -11,7 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
-@Path("/tenant")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class TenantResource {
 
@@ -22,14 +23,16 @@ public class TenantResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/tenant/{id}")
     public Tenant getById(@NotNull final Long id) {
         return Tenant.findByIdRequired(id);
     }
 
     @POST
     @Transactional
+    @Path("/tenant")
     @ResponseStatus(201)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Tenant create(@NotNull @Valid final NewTenant newTenant) {
         final var tenant = new Tenant();
         tenant.name = newTenant.name;

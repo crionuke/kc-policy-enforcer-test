@@ -24,7 +24,7 @@ public class Project extends BaseEntity {
                 .orElseThrow(() -> new ProjectNotFound(projectId));
     }
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "tenant_id", nullable = false)
     public Tenant tenant;
 

@@ -31,11 +31,15 @@ public class VersionResourceTest {
     @Inject
     ProjectResourceTest projectResourceTest;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    public Version persistTestVersion(final Project project) {
-        final var testVersion = createTestVersion(project);
+    @Transactional
+    public Version persistTestVersion(final Project project, VersionStatus status) {
+        final var testVersion = createTestVersion(project, status);
         testVersion.persist();
         return testVersion;
+    }
+
+    public Version persistTestVersion(final Project project) {
+        return persistTestVersion(project, VersionStatus.CREATED);
     }
 
     @Test
@@ -45,11 +49,9 @@ public class VersionResourceTest {
         final var testVersion = persistTestVersion(testProject);
 
         given()
-                .pathParam("tenantId", testTenant.id)
-                .pathParam("projectId", testProject.id)
                 .pathParam("id", testVersion.id)
                 .when()
-                .get("/{id}")
+                .get("/version/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
@@ -70,11 +72,9 @@ public class VersionResourceTest {
         final var nonExistentId = new Random().nextLong();
 
         given()
-                .pathParam("tenantId", testTenant.id)
-                .pathParam("projectId", testProject.id)
                 .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}")
+                .get("/version/{id}")
                 .then()
                 .log().body()
                 .statusCode(404)
@@ -93,12 +93,11 @@ public class VersionResourceTest {
         newVersion.config = createVersionConfig();
 
         final var version = given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(newVersion)
                 .when()
-                .post()
+                .post("/project/{projectId}/version")
                 .then()
                 .log().body()
                 .statusCode(201)
@@ -122,12 +121,11 @@ public class VersionResourceTest {
         final var invalidVersion = new NewVersion();
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(invalidVersion)
                 .when()
-                .post()
+                .post("/project/{projectId}/version")
                 .then()
                 .log().body()
                 .statusCode(400)
@@ -146,25 +144,24 @@ public class VersionResourceTest {
         newVersion.config = createVersionConfig();
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(newVersion)
                 .when()
-                .post()
+                .post("/project/{projectId}/version")
                 .then()
                 .log().body()
                 .statusCode(409)
                 .body("code", equalTo("ProjectStatusMismatch"));
     }
 
-    private Version createTestVersion(final Project project) {
+    private Version createTestVersion(final Project project, final VersionStatus status) {
         final var version = new Version();
         version.project = project;
         version.major = 1L;
         version.minor = 0L;
         version.patch = 0L;
-        version.status = VersionStatus.CREATED;
+        version.status = status;
         version.config = createVersionConfig();
         version.persist();
 

@@ -53,3 +53,14 @@ create table if not exists omgtenants_stage (
     config jsonb not null,
     deleted boolean not null
 );
+
+create table if not exists omgtenants_deployment (
+    id bigint primary key default nextval('omgtenants_id_sequence'),
+    created timestamp with time zone not null,
+    modified timestamp with time zone not null,
+    stage_id bigint not null references omgtenants_stage(id) on delete restrict on update restrict,
+    version_id bigint not null references omgtenants_version(id) on delete restrict on update restrict,
+    status text not null,
+    config jsonb not null,
+    deleted boolean not null
+);

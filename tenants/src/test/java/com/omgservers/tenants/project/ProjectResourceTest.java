@@ -27,7 +27,7 @@ public class ProjectResourceTest {
     @Inject
     TenantResourceTest tenantResourceTest;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     public Project persistTestProject(final Tenant tenant, final ProjectStatus status) {
         final var testProject = createTestProject(tenant, status);
         testProject.persist();
@@ -44,10 +44,9 @@ public class ProjectResourceTest {
         final var testProject = persistTestProject(testTenant);
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("id", testProject.id)
                 .when()
-                .get("/{id}")
+                .get("/project/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
@@ -65,10 +64,9 @@ public class ProjectResourceTest {
         final var nonExistentId = new Random().nextLong();
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}", nonExistentId)
+                .get("/project/{id}")
                 .then()
                 .statusCode(404)
                 .body("code", equalTo("ProjectNotFound"));
@@ -87,7 +85,7 @@ public class ProjectResourceTest {
                 .contentType(ContentType.JSON)
                 .body(newProject)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/project")
                 .then()
                 .log().body()
                 .statusCode(201)
@@ -112,7 +110,7 @@ public class ProjectResourceTest {
                 .contentType(ContentType.JSON)
                 .body(invalidProject)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/project")
                 .then()
                 .log().body()
                 .statusCode(400)
@@ -132,7 +130,7 @@ public class ProjectResourceTest {
                 .contentType(ContentType.JSON)
                 .body(newProject)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/project")
                 .then()
                 .log().body()
                 .statusCode(409)

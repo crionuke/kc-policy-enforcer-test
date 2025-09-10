@@ -2,6 +2,9 @@ package com.omgservers.tenants.version;
 
 import com.omgservers.tenants.base.BaseEntity;
 import com.omgservers.tenants.errors.VersionNotFound;
+import com.omgservers.tenants.errors.VersionProjectMismatch;
+import com.omgservers.tenants.errors.VersionStatusMismatch;
+import com.omgservers.tenants.errors.VersionTenantMismatch;
 import com.omgservers.tenants.project.Project;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +25,7 @@ public class Version extends BaseEntity {
                 .orElseThrow(() -> new VersionNotFound(versionId));
     }
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     public Project project;
 
@@ -42,4 +45,26 @@ public class Version extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     public VersionConfig config;
+
+    public void ensureTenant(final Long requiredTenantId) {
+        final var versionTenantId = project.tenant.id;
+        if (!versionTenantId.equals(requiredTenantId)) {
+            throw new VersionTenantMismatch(id, versionTenantId, requiredTenantId);
+        }
+    }
+
+    public void ensureProject(final Long requiredProjectId) {
+        final var versionProjectId = project.id;
+        if (!versionProjectId.equals(requiredProjectId)) {
+            throw new VersionProjectMismatch(id, versionProjectId, requiredProjectId);
+        }
+    }
+
+    public void ensureCreatedStatus() {
+        final var versionStatus = status;
+        final var requiredStatus = VersionStatus.CREATED;
+        if (!versionStatus.equals(requiredStatus)) {
+            throw new VersionStatusMismatch(id, versionStatus, requiredStatus);
+        }
+    }
 }

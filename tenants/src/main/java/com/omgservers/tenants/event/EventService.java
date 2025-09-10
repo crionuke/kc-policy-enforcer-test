@@ -38,6 +38,14 @@ public class EventService {
         create(EventQualifier.STAGE_DELETED, stageId);
     }
 
+    public void deploymentCreated(final Long deploymentId) {
+        create(EventQualifier.DEPLOYMENT_CREATED, deploymentId);
+    }
+
+    public void deploymentDeleted(final Long deploymentId) {
+        create(EventQualifier.DEPLOYMENT_DELETED, deploymentId);
+    }
+
     @Transactional
     void create(final EventQualifier qualifier, final Long resourceId) {
         final var event = new Event();

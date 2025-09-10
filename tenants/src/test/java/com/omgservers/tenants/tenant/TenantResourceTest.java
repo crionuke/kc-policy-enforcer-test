@@ -8,8 +8,6 @@ import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
@@ -22,9 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestHTTPEndpoint(TenantResource.class)
 public class TenantResourceTest {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantResourceTest.class);
-
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     public Tenant persistTestTenant(final TenantStatus status) {
         final var testTenant = createTestTenant(status);
         testTenant.persist();
@@ -40,8 +36,9 @@ public class TenantResourceTest {
         final var testTenant = persistTestTenant();
 
         given()
+                .pathParam("id", testTenant.id)
                 .when()
-                .get("/{id}", testTenant.id)
+                .get("/tenant/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
@@ -57,8 +54,9 @@ public class TenantResourceTest {
         final var nonExistentId = new Random().nextLong();
 
         given()
+                .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}", nonExistentId)
+                .get("/tenant/{id}")
                 .then()
                 .statusCode(404)
                 .body("code", equalTo("TenantNotFound"));
@@ -74,7 +72,7 @@ public class TenantResourceTest {
                 .contentType(ContentType.JSON)
                 .body(newTenant)
                 .when()
-                .post()
+                .post("/tenant")
                 .then()
                 .log().body()
                 .statusCode(201)
@@ -96,7 +94,7 @@ public class TenantResourceTest {
                 .contentType(ContentType.JSON)
                 .body(invalidTenant)
                 .when()
-                .post()
+                .post("/tenant")
                 .then()
                 .log().body()
                 .statusCode(400)

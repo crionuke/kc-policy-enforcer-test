@@ -14,9 +14,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-@Path("/tenant/{tenantId}/project")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
     final EventService eventService;
@@ -26,7 +25,7 @@ public class ProjectResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/project/{id}")
     public Project getById(@NotNull final Long id) {
         return Project.findByIdRequired(id);
     }
@@ -34,6 +33,8 @@ public class ProjectResource {
     @POST
     @Transactional
     @ResponseStatus(201)
+    @Path("/tenant/{tenantId}/project")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Project create(@RestPath @NotNull final Long tenantId,
                           @NotNull @Valid final NewProject newProject) {
         final var tenant = Tenant.findByIdRequired(tenantId);

@@ -9,4 +9,6 @@ public enum EventQualifier {
     VERSION_DELETED,
     STAGE_CREATED,
     STAGE_DELETED,
+    DEPLOYMENT_CREATED,
+    DEPLOYMENT_DELETED,
 }

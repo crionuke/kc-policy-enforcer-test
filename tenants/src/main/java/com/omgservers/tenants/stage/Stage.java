@@ -1,7 +1,12 @@
 package com.omgservers.tenants.stage;
 
 import com.omgservers.tenants.base.BaseEntity;
+import com.omgservers.tenants.errors.ProjectStatusMismatch;
+import com.omgservers.tenants.errors.ProjectTenantMismatch;
 import com.omgservers.tenants.errors.StageNotFound;
+import com.omgservers.tenants.errors.StageStatusMismatch;
+import com.omgservers.tenants.errors.StageTenantMismatch;
+import com.omgservers.tenants.project.ProjectStatus;
 import com.omgservers.tenants.tenant.Tenant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +27,7 @@ public class Stage extends BaseEntity {
                 .orElseThrow(() -> new StageNotFound(stageId));
     }
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "tenant_id", nullable = false)
     public Tenant tenant;
 
@@ -36,4 +41,19 @@ public class Stage extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     public StageConfig config;
+
+    public void ensureTenant(final Long requiredTenantId) {
+        final var stageTenantId = tenant.id;
+        if (!stageTenantId.equals(requiredTenantId)) {
+            throw new StageTenantMismatch(id, stageTenantId, requiredTenantId);
+        }
+    }
+
+    public void ensureCreatedStatus() {
+        final var stageStatus = status;
+        final var requiredStatus = StageStatus.CREATED;
+        if (!stageStatus.equals(requiredStatus)) {
+            throw new StageStatusMismatch(id, stageStatus, requiredStatus);
+        }
+    }
 }

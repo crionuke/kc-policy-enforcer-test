@@ -14,9 +14,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-@Path("/tenant/{tenantId}/stage")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class StageResource {
 
     final EventService eventService;
@@ -26,7 +25,7 @@ public class StageResource {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/stage/{id}")
     public Stage getById(@NotNull final Long id) {
         return Stage.findByIdRequired(id);
     }
@@ -34,6 +33,8 @@ public class StageResource {
     @POST
     @Transactional
     @ResponseStatus(201)
+    @Path("/tenant/{tenantId}/stage")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Stage create(@RestPath @NotNull final Long tenantId,
                         @NotNull @Valid final NewStage newStage) {
         final var tenant = Tenant.findByIdRequired(tenantId);

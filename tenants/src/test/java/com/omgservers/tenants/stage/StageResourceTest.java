@@ -25,11 +25,15 @@ public class StageResourceTest {
     @Inject
     TenantResourceTest tenantResourceTest;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    public Stage persistTestStage(final Tenant tenant) {
-        final var testStage = createTestStage(tenant);
+    @Transactional
+    public Stage persistTestStage(final Tenant tenant, final StageStatus status) {
+        final var testStage = createTestStage(tenant, status);
         testStage.persist();
         return testStage;
+    }
+
+    public Stage persistTestStage(final Tenant tenant) {
+        return persistTestStage(tenant, StageStatus.CREATED);
     }
 
     @Test
@@ -38,10 +42,9 @@ public class StageResourceTest {
         final var testStage = persistTestStage(testTenant);
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("id", testStage.id)
                 .when()
-                .get("/{id}", testStage.id)
+                .get("/stage/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
@@ -59,10 +62,9 @@ public class StageResourceTest {
         final var nonExistentId = new Random().nextLong();
 
         given()
-                .pathParam("tenantId", testTenant.id)
                 .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}")
+                .get("/stage/{id}")
                 .then()
                 .statusCode(404)
                 .body("code", equalTo("StageNotFound"));
@@ -81,7 +83,7 @@ public class StageResourceTest {
                 .contentType(ContentType.JSON)
                 .body(newStage)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/stage")
                 .then()
                 .log().body()
                 .statusCode(201)
@@ -105,7 +107,7 @@ public class StageResourceTest {
                 .contentType(ContentType.JSON)
                 .body(invalidStage)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/stage")
                 .then()
                 .log().body()
                 .statusCode(400)
@@ -125,18 +127,18 @@ public class StageResourceTest {
                 .contentType(ContentType.JSON)
                 .body(newStage)
                 .when()
-                .post()
+                .post("/tenant/{tenantId}/stage")
                 .then()
                 .log().body()
                 .statusCode(409)
                 .body("code", equalTo("TenantStatusMismatch"));
     }
 
-    private Stage createTestStage(final Tenant tenant) {
+    private Stage createTestStage(final Tenant tenant, final StageStatus status) {
         final var stage = new Stage();
         stage.tenant = tenant;
         stage.name = "Test stage";
-        stage.status = StageStatus.CREATED;
+        stage.status = status;
         stage.config = createStageConfig();
         stage.persist();
 
