@@ -1,6 +1,6 @@
 package com.omgservers.tenants.errors;
 
-public class RestError {
+public class ErrorResponse {
     public String code;
     public String message;
 }
