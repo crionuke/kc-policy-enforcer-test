@@ -1,7 +1,6 @@
 package com.omgservers.tenants.errors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -27,7 +26,7 @@ public class ExceptionMappers {
     }
 
     @ServerExceptionMapper
-    public RestResponse<RestError> resourceConflictMapper(final ValidationException e) {
+    public RestResponse<RestError> validationExceptionMapper(final ValidationException e) {
         final var error = new RestError();
         error.code = "ValidationFailed";
         error.message = e.getMessage();

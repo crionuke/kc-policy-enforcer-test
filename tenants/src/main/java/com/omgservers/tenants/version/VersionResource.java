@@ -12,10 +12,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
+import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
-@Path("/version")
+@Path("/tenant/{tenantId}/project/{projectId}/version")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class VersionResource {
@@ -28,16 +27,18 @@ public class VersionResource {
 
     @GET
     @Path("/{id}")
-    public Version getById(@NotNull final UUID id) {
+    public Version getById(@NotNull final Long id) {
         return Version.findByIdRequired(id);
     }
 
     @POST
     @Transactional
     @ResponseStatus(201)
-    public Version create(@NotNull @Valid final NewVersion newVersion) {
-        final var projectId = newVersion.projectId;
+    public Version create(@RestPath @NotNull final Long tenantId,
+                          @RestPath @NotNull final Long projectId,
+                          @NotNull @Valid final NewVersion newVersion) {
         final var project = Project.findByIdRequired(projectId);
+        project.ensureTenant(tenantId);
         project.ensureCreatedStatus();
 
         final var version = new Version();
@@ -50,7 +51,7 @@ public class VersionResource {
         version.persist();
 
         eventService.versionCreated(version.id);
-        
+
         return version;
     }
 }

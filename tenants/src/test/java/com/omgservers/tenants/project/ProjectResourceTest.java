@@ -13,7 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,14 +44,16 @@ public class ProjectResourceTest {
         final var testProject = persistTestProject(testTenant);
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("id", testProject.id)
                 .when()
-                .get("/{id}", testProject.id)
+                .get("/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("id", equalTo(testProject.id.toString()))
-                .body("tenant.id", equalTo(testTenant.id.toString()))
+                .body("id", equalTo(testProject.id.intValue()))
+                .body("tenant.id", equalTo(testTenant.id.intValue()))
                 .body("name", equalTo(testProject.name))
                 .body("status", equalTo(testProject.status.toString()))
                 .body("config", notNullValue());
@@ -59,9 +61,12 @@ public class ProjectResourceTest {
 
     @Test
     void testGetProjectByIdNotFound() {
-        final var nonExistentId = UUID.randomUUID();
+        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var nonExistentId = new Random().nextLong();
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("id", nonExistentId)
                 .when()
                 .get("/{id}", nonExistentId)
                 .then()
@@ -74,11 +79,11 @@ public class ProjectResourceTest {
         final var testTenant = tenantResourceTest.persistTestTenant();
 
         final var newProject = new NewProject();
-        newProject.tenantId = testTenant.id;
         newProject.name = "New project";
         newProject.config = createProjectConfig();
 
         final var project = given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newProject)
                 .when()
@@ -98,9 +103,12 @@ public class ProjectResourceTest {
 
     @Test
     void testCreateProjectValidationFailed() {
+        final var testTenant = tenantResourceTest.persistTestTenant();
+
         final var invalidProject = new NewProject();
 
         given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(invalidProject)
                 .when()
@@ -116,11 +124,11 @@ public class ProjectResourceTest {
         final var testTenant = tenantResourceTest.persistTestTenant(TenantStatus.CREATING);
 
         final var newProject = new NewProject();
-        newProject.tenantId = testTenant.id;
         newProject.name = "New project";
         newProject.config = createProjectConfig();
 
         given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newProject)
                 .when()

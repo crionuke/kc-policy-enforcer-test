@@ -12,10 +12,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
+import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
-@Path("/project")
+@Path("/tenant/{tenantId}/project")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProjectResource {
@@ -28,15 +27,15 @@ public class ProjectResource {
 
     @GET
     @Path("/{id}")
-    public Project getById(@NotNull final UUID id) {
+    public Project getById(@NotNull final Long id) {
         return Project.findByIdRequired(id);
     }
 
     @POST
     @Transactional
     @ResponseStatus(201)
-    public Project create(@NotNull @Valid final NewProject newProject) {
-        final var tenantId = newProject.tenantId;
+    public Project create(@RestPath @NotNull final Long tenantId,
+                          @NotNull @Valid final NewProject newProject) {
         final var tenant = Tenant.findByIdRequired(tenantId);
         tenant.ensureCreatedStatus();
 

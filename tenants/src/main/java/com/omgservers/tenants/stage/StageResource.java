@@ -12,10 +12,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
+import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
-@Path("/stage")
+@Path("/tenant/{tenantId}/stage")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class StageResource {
@@ -28,15 +27,15 @@ public class StageResource {
 
     @GET
     @Path("/{id}")
-    public Stage getById(@NotNull final UUID id) {
+    public Stage getById(@NotNull final Long id) {
         return Stage.findByIdRequired(id);
     }
 
     @POST
     @Transactional
     @ResponseStatus(201)
-    public Stage create(@NotNull @Valid final NewStage newStage) {
-        final var tenantId = newStage.tenantId;
+    public Stage create(@RestPath @NotNull final Long tenantId,
+                        @NotNull @Valid final NewStage newStage) {
         final var tenant = Tenant.findByIdRequired(tenantId);
         tenant.ensureCreatedStatus();
 

@@ -11,8 +11,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
-import java.util.UUID;
-
 @Path("/tenant")
 @Produces(MediaType.APPLICATION_JSON)
 public class TenantResource {
@@ -25,7 +23,7 @@ public class TenantResource {
 
     @GET
     @Path("/{id}")
-    public Tenant getById(@NotNull final UUID id) {
+    public Tenant getById(@NotNull final Long id) {
         return Tenant.findByIdRequired(id);
     }
 

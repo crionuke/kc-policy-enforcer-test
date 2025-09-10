@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -46,7 +46,7 @@ public class TenantResourceTest {
                 .log().body()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("id", equalTo(testTenant.id.toString()))
+                .body("id", equalTo(testTenant.id.intValue()))
                 .body("name", equalTo(testTenant.name))
                 .body("status", equalTo(testTenant.status.toString()))
                 .body("config", notNullValue());
@@ -54,7 +54,7 @@ public class TenantResourceTest {
 
     @Test
     void testGetTenantByIdNotFound() {
-        final var nonExistentId = UUID.randomUUID();
+        final var nonExistentId = new Random().nextLong();
 
         given()
                 .when()

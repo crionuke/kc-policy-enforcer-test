@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,14 +38,16 @@ public class StageResourceTest {
         final var testStage = persistTestStage(testTenant);
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("id", testStage.id)
                 .when()
                 .get("/{id}", testStage.id)
                 .then()
                 .log().body()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("id", equalTo(testStage.id.toString()))
-                .body("tenant.id", equalTo(testTenant.id.toString()))
+                .body("id", equalTo(testStage.id.intValue()))
+                .body("tenant.id", equalTo(testTenant.id.intValue()))
                 .body("name", equalTo(testStage.name))
                 .body("status", equalTo(testStage.status.toString()))
                 .body("config", notNullValue());
@@ -53,11 +55,14 @@ public class StageResourceTest {
 
     @Test
     void testGetStageByIdNotFound() {
-        final var nonExistentId = UUID.randomUUID();
+        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var nonExistentId = new Random().nextLong();
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}", nonExistentId)
+                .get("/{id}")
                 .then()
                 .statusCode(404)
                 .body("code", equalTo("StageNotFound"));
@@ -68,11 +73,11 @@ public class StageResourceTest {
         final var testTenant = tenantResourceTest.persistTestTenant();
 
         final var newStage = new NewStage();
-        newStage.tenantId = testTenant.id;
         newStage.name = "New stage";
         newStage.config = createStageConfig();
 
         final var stage = given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newStage)
                 .when()
@@ -92,9 +97,11 @@ public class StageResourceTest {
 
     @Test
     void testCreateStageValidationFailed() {
+        final var testTenant = tenantResourceTest.persistTestTenant();
         final var invalidStage = new NewStage();
 
         given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(invalidStage)
                 .when()
@@ -110,11 +117,11 @@ public class StageResourceTest {
         final var testTenant = tenantResourceTest.persistTestTenant(TenantStatus.CREATING);
 
         final var newStage = new NewStage();
-        newStage.tenantId = testTenant.id;
         newStage.name = "New stage";
         newStage.config = createStageConfig();
 
         given()
+                .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newStage)
                 .when()

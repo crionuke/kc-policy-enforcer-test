@@ -8,13 +8,11 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "omgtenants_event")
 public class Event extends BaseEntity {
 
-    public static Event findFirstRequired(final EventQualifier qualifier, final UUID resourceId) {
+    public static Event findFirstRequired(final EventQualifier qualifier, final Long resourceId) {
         return Event.<Event>find("qualifier = ?1 and resourceId = ?2 order by created desc",
                         qualifier, resourceId).firstResultOptional()
                 .orElseThrow(() -> new EventNotFound(qualifier, resourceId));
@@ -25,6 +23,6 @@ public class Event extends BaseEntity {
     public EventQualifier qualifier;
 
     @Column(nullable = false, name = "resource_id")
-    public UUID resourceId;
+    public Long resourceId;
 
 }

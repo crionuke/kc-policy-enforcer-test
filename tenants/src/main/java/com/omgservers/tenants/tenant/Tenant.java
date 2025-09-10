@@ -11,13 +11,11 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "omgtenants_tenant")
 public class Tenant extends BaseEntity {
 
-    public static Tenant findByIdRequired(final UUID tenantId) {
+    public static Tenant findByIdRequired(final Long tenantId) {
         return Tenant.<Tenant>findByIdOptional(tenantId)
                 .orElseThrow(() -> new TenantNotFound(tenantId));
     }

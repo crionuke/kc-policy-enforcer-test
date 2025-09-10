@@ -13,13 +13,11 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "omgtenants_version")
 public class Version extends BaseEntity {
 
-    public static Version findByIdRequired(final UUID versionId) {
+    public static Version findByIdRequired(final Long versionId) {
         return Version.<Version>findByIdOptional(versionId)
                 .orElseThrow(() -> new VersionNotFound(versionId));
     }

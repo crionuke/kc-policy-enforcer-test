@@ -1,11 +1,9 @@
 package com.omgservers.tenants.errors;
 
-import java.util.UUID;
-
 public class ProjectNotFound extends ResourceNotFound {
 
-    public ProjectNotFound(final UUID projectId) {
-        super("Stage %s not found"
+    public ProjectNotFound(final Long projectId) {
+        super("Project %d not found"
                 .formatted(projectId));
     }
 }

@@ -1,11 +1,9 @@
 package com.omgservers.tenants.errors;
 
-import java.util.UUID;
-
 public class VersionNotFound extends ResourceNotFound {
 
-    public VersionNotFound(final UUID versionId) {
-        super("Version %s not found"
+    public VersionNotFound(final Long versionId) {
+        super("Version %d not found"
                 .formatted(versionId));
     }
 }

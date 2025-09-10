@@ -4,12 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
-import java.util.UUID;
-
 public class NewVersion {
-
-    @NotNull
-    public UUID projectId;
 
     @NotNull
     @PositiveOrZero

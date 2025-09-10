@@ -3,6 +3,7 @@ package com.omgservers.tenants.project;
 import com.omgservers.tenants.base.BaseEntity;
 import com.omgservers.tenants.errors.ProjectNotFound;
 import com.omgservers.tenants.errors.ProjectStatusMismatch;
+import com.omgservers.tenants.errors.ProjectTenantMismatch;
 import com.omgservers.tenants.tenant.Tenant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,13 +15,11 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "omgtenants_project")
 public class Project extends BaseEntity {
 
-    public static Project findByIdRequired(final UUID projectId) {
+    public static Project findByIdRequired(final Long projectId) {
         return Project.<Project>findByIdOptional(projectId)
                 .orElseThrow(() -> new ProjectNotFound(projectId));
     }
@@ -39,6 +38,13 @@ public class Project extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     public ProjectConfig config;
+
+    public void ensureTenant(final Long requiredTenantId) {
+        final var projectTenantId = tenant.id;
+        if (!projectTenantId.equals(requiredTenantId)) {
+            throw new ProjectTenantMismatch(id, projectTenantId, requiredTenantId);
+        }
+    }
 
     public void ensureCreatedStatus() {
         final var projectStatus = status;

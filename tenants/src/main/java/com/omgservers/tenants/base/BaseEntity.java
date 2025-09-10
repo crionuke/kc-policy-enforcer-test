@@ -1,21 +1,25 @@
 package com.omgservers.tenants.base;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.SequenceGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @MappedSuperclass
 public class BaseEntity extends PanacheEntityBase {
 
     @Id
-    @UUIDv7Identifier
-    public UUID id;
+    @SequenceGenerator(name = "entity_id_generator", sequenceName = "omgtenants_id_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_id_generator")
+    public Long id;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

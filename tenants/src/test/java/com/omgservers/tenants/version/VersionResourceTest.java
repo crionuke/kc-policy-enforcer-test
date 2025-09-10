@@ -14,7 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -45,14 +45,17 @@ public class VersionResourceTest {
         final var testVersion = persistTestVersion(testProject);
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("projectId", testProject.id)
+                .pathParam("id", testVersion.id)
                 .when()
-                .get("/{id}", testVersion.id)
+                .get("/{id}")
                 .then()
                 .log().body()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("id", equalTo(testVersion.id.toString()))
-                .body("project.id", equalTo(testProject.id.toString()))
+                .body("id", equalTo(testVersion.id.intValue()))
+                .body("project.id", equalTo(testProject.id.intValue()))
                 .body("major", equalTo(testVersion.major.intValue()))
                 .body("minor", equalTo(testVersion.minor.intValue()))
                 .body("patch", equalTo(testVersion.patch.intValue()))
@@ -62,11 +65,16 @@ public class VersionResourceTest {
 
     @Test
     void testGetVersionByIdNotFound() {
-        final var nonExistentId = UUID.randomUUID();
+        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var testProject = projectResourceTest.persistTestProject(testTenant);
+        final var nonExistentId = new Random().nextLong();
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("projectId", testProject.id)
+                .pathParam("id", nonExistentId)
                 .when()
-                .get("/{id}", nonExistentId)
+                .get("/{id}")
                 .then()
                 .log().body()
                 .statusCode(404)
@@ -79,13 +87,14 @@ public class VersionResourceTest {
         final var testProject = projectResourceTest.persistTestProject(testTenant);
 
         final var newVersion = new NewVersion();
-        newVersion.projectId = testProject.id;
         newVersion.major = 1L;
         newVersion.minor = 0L;
         newVersion.patch = 0L;
         newVersion.config = createVersionConfig();
 
         final var version = given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(newVersion)
                 .when()
@@ -107,9 +116,14 @@ public class VersionResourceTest {
 
     @Test
     void testCreateVersionValidationFailed() {
+        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var testProject = projectResourceTest.persistTestProject(testTenant);
+
         final var invalidVersion = new NewVersion();
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(invalidVersion)
                 .when()
@@ -126,13 +140,14 @@ public class VersionResourceTest {
         final var testProject = projectResourceTest.persistTestProject(testTenant, ProjectStatus.CREATING);
 
         final var newVersion = new NewVersion();
-        newVersion.projectId = testProject.id;
         newVersion.major = 1L;
         newVersion.minor = 0L;
         newVersion.patch = 0L;
         newVersion.config = createVersionConfig();
 
         given()
+                .pathParam("tenantId", testTenant.id)
+                .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(newVersion)
                 .when()

@@ -1,16 +1,15 @@
 quarkus:
   application:
-    name: tenants
+    name: ${APPLICATION_NAME:tenants}
   datasource:
     db-kind: postgresql
   hibernate-orm:
-    database:
-      generation: none
     mapping:
       format:
         global: ignore
   flyway:
-    migrate-at-start: true
+    enabled: true
+    migrate-at-start: ${MIGRATE_AT_START:true}
   container-image:
     group: omgservers
     name: tenants
@@ -23,5 +22,7 @@ quarkus:
   scheduler:
     start-mode: forced
   quartz:
-    clustered: false
+    clustered: true
+    store-type: jdbc-cmt
+    instance-name: tenants
 
