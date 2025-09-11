@@ -25,4 +25,10 @@ quarkus:
     clustered: true
     store-type: jdbc-cmt
     instance-name: omgservice
-
+    cluster-checkin-interval: 5000
+  keycloak:
+    policy-enforcer:
+      enable: false
+      lazy-load-paths: false
+  oidc:
+    client-id: omgservice
