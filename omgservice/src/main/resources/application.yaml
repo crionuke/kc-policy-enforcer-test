@@ -28,7 +28,7 @@ quarkus:
     cluster-checkin-interval: 5000
   keycloak:
     policy-enforcer:
-      enable: false
+      enable: true
       lazy-load-paths: false
   oidc:
     client-id: omgservice

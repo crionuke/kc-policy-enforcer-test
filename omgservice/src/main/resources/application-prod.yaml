@@ -7,6 +7,5 @@ quarkus:
       url: ${DATABASE_URL}
   oidc:
     auth-server-url: ${AUTH_SERVER_URL}
-    client-id: omgservice
     credentials:
       secret: ${AUTH_CLIENT_SECRET}
