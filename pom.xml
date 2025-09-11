@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>tenants</module>
+        <module>omgservice</module>
         <module>localtesting</module>
     </modules>
 

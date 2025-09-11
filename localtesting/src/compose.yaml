@@ -46,18 +46,16 @@ services:
     volumes:
       - ./omgplayer-realm.json:/opt/keycloak/data/import/omgplayer-realm.json:r
       - ./omgusers-realm.json:/opt/keycloak/data/import/omgusers-realm.json:r
-  tenants:
-    image: "omgservers/tenants:${OMGSERVERS_VERSION}"
-#    container_name: "tenants"
-    deploy:
-      replicas: 4
+  omgservice:
+    image: "omgservers/omgservice:${OMGSERVERS_VERSION}"
+    container_name: "omgservice"
     restart: unless-stopped
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5432/omgservers?current_schema=tenants
-      DATABASE_USERNAME: tenants
-      DATABASE_PASSWORD: tenants
-#    ports:
-#      - "8001:8080"
+      DATABASE_URL: jdbc:postgresql://postgres:5432/omgservers?current_schema=omgservice
+      DATABASE_USERNAME: omgservice
+      DATABASE_PASSWORD: omgservice
+    ports:
+      - "8001:8080"
     networks:
       - omgservers
     volumes:

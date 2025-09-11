@@ -1,0 +1,14 @@
+package com.omgservers.omgservice.event;
+
+public enum EventQualifier {
+    TENANT_CREATED,
+    TENANT_DELETED,
+    PROJECT_CREATED,
+    PROJECT_DELETED,
+    VERSION_CREATED,
+    VERSION_DELETED,
+    STAGE_CREATED,
+    STAGE_DELETED,
+    DEPLOYMENT_CREATED,
+    DEPLOYMENT_DELETED,
+}
