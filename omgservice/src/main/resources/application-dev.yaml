@@ -1,9 +1,5 @@
 quarkus:
   keycloak:
-    policy-enforcer:
-      paths:
-        - path: /q
-          enforcement-mode: DISABLED
     devservices:
       port: 8000
       realm-path: omgservers-realm.json
