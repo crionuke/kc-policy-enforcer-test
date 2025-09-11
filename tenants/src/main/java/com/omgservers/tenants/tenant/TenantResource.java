@@ -1,5 +1,6 @@
 package com.omgservers.tenants.tenant;
 
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.event.EventService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -40,7 +41,7 @@ public class TenantResource {
         tenant.config = newTenant.config;
         tenant.persist();
 
-        eventService.tenantCreated(tenant.id);
+        eventService.create(EventQualifier.TENANT_CREATED, tenant.id);
         
         return tenant;
     }

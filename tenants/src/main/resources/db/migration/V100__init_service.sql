@@ -6,6 +6,7 @@ create table if not exists omgtenants_event (
     modified timestamp with time zone not null,
     qualifier text not null,
     resource_id bigint not null,
+    failed boolean not null,
     deleted boolean not null
 );
 

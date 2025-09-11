@@ -1,5 +1,6 @@
 package com.omgservers.tenants.project;
 
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.tenant.Tenant;
 import jakarta.transaction.Transactional;
@@ -47,7 +48,7 @@ public class ProjectResource {
         project.config = newProject.config;
         project.persist();
 
-        eventService.projectCreated(project.id);
+        eventService.create(EventQualifier.PROJECT_CREATED, project.id);
         
         return project;
     }

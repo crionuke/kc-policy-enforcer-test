@@ -1,56 +1,58 @@
 package com.omgservers.tenants.event;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class EventService {
+    private static final Logger log = LoggerFactory.getLogger(EventService.class);
 
-    public void tenantCreated(final Long tenantId) {
-        create(EventQualifier.TENANT_CREATED, tenantId);
+    public final Map<EventQualifier, EventHandler> handlers;
+
+    public EventService(final Instance<EventHandler> beans) {
+        handlers = new ConcurrentHashMap<>();
+        beans.stream().forEach(handler -> {
+            final var qualifier = handler.getQualifier();
+            handlers.put(qualifier, handler);
+        });
+
+        log.info("Registered event handlers, {}", handlers.keySet());
     }
 
-    public void tenantDeleted(final Long tenantId) {
-        create(EventQualifier.TENANT_DELETED, tenantId);
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public List<Event> listForHandling() {
+        return Event.listNotDeleted(16);
     }
 
-    public void projectCreated(final Long projectId) {
-        create(EventQualifier.PROJECT_CREATED, projectId);
-    }
-
-    public void projectDeleted(final Long projectId) {
-        create(EventQualifier.PROJECT_DELETED, projectId);
-    }
-
-    public void versionCreated(final Long versionId) {
-        create(EventQualifier.VERSION_CREATED, versionId);
-    }
-
-    public void versionDeleted(final Long versionId) {
-        create(EventQualifier.VERSION_DELETED, versionId);
-    }
-
-    public void stageCreated(final Long stageId) {
-        create(EventQualifier.STAGE_CREATED, stageId);
-    }
-
-    public void stageDeleted(final Long stageId) {
-        create(EventQualifier.STAGE_DELETED, stageId);
-    }
-
-    public void deploymentCreated(final Long deploymentId) {
-        create(EventQualifier.DEPLOYMENT_CREATED, deploymentId);
-    }
-
-    public void deploymentDeleted(final Long deploymentId) {
-        create(EventQualifier.DEPLOYMENT_DELETED, deploymentId);
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void deleteAndMark(final Event event, final boolean failed) {
+        Event.deleteAndMark(event.id, failed);
     }
 
     @Transactional
-    void create(final EventQualifier qualifier, final Long resourceId) {
+    public void create(final EventQualifier qualifier, final Long resourceId) {
         final var event = new Event();
         event.qualifier = qualifier;
         event.resourceId = resourceId;
+        event.failed = false;
         event.persist();
+    }
+
+    public void handle(final Event event) {
+        final var qualifier = event.qualifier;
+        final var handler = handlers.get(qualifier);
+        if (Objects.nonNull(handler)) {
+            handler.handle(event.resourceId);
+        } else {
+            log.error("No handler found for {}", qualifier);
+        }
     }
 }

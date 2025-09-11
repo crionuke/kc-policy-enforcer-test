@@ -1,5 +1,6 @@
 package com.omgservers.tenants.deployment;
 
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.stage.Stage;
 import com.omgservers.tenants.version.Version;
@@ -63,7 +64,7 @@ public class DeploymentResource {
         deployment.config = newDeployment.config;
         deployment.persist();
 
-        eventService.deploymentCreated(deployment.id);
+        eventService.create(EventQualifier.DEPLOYMENT_CREATED, deployment.id);
 
         return deployment;
     }

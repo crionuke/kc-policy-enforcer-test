@@ -1,5 +1,6 @@
 package com.omgservers.tenants.version;
 
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.project.Project;
 import jakarta.transaction.Transactional;
@@ -49,7 +50,7 @@ public class VersionResource {
         version.config = newVersion.config;
         version.persist();
 
-        eventService.versionCreated(version.id);
+        eventService.create(EventQualifier.VERSION_CREATED, version.id);
 
         return version;
     }

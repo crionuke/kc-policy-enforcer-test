@@ -1,5 +1,6 @@
 package com.omgservers.tenants.stage;
 
+import com.omgservers.tenants.event.EventQualifier;
 import com.omgservers.tenants.event.EventService;
 import com.omgservers.tenants.tenant.Tenant;
 import jakarta.transaction.Transactional;
@@ -47,7 +48,7 @@ public class StageResource {
         stage.config = newStage.config;
         stage.persist();
 
-        eventService.stageCreated(stage.id);
+        eventService.create(EventQualifier.STAGE_CREATED, stage.id);
         
         return stage;
     }
