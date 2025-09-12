@@ -7,9 +7,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class TenantCreatedHandler implements EventHandler {
 
+    final TenantAuthzService tenantAuthzService;
     final TenantService tenantService;
 
-    public TenantCreatedHandler(final TenantService tenantService) {
+    public TenantCreatedHandler(final TenantAuthzService tenantAuthzService,
+                                final TenantService tenantService) {
+        this.tenantAuthzService = tenantAuthzService;
         this.tenantService = tenantService;
     }
 
@@ -20,6 +23,10 @@ public class TenantCreatedHandler implements EventHandler {
 
     @Override
     public void handle(final Long resourceId) {
+        tenantAuthzService.createResourceIfAny(resourceId);
+        tenantAuthzService.createViewersGroupIfAny(resourceId);
+        tenantAuthzService.createManagersGroupIfAny(resourceId);
+        tenantAuthzService.createOwnersGroupIfAny(resourceId);
         tenantService.switchStateFromCreatingToCreated(resourceId);
     }
 }

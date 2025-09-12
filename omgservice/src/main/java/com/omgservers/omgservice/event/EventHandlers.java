@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class EventHandlers {
-    private static final Logger log = LoggerFactory.getLogger(EventService.class);
+    static final Logger log = LoggerFactory.getLogger(EventHandlers.class);
 
-    public final Map<EventQualifier, EventHandler> handlers;
+    final Map<EventQualifier, EventHandler> handlers;
 
     public EventHandlers(final Instance<EventHandler> beans) {
         handlers = new ConcurrentHashMap<>();

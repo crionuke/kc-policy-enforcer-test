@@ -1,8 +1,9 @@
 package com.omgservers.omgservice.job;
 
 import io.quarkus.arc.Arc;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Singleton;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -20,7 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Singleton
+@ApplicationScoped
 public class JobService {
     private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
@@ -68,6 +69,7 @@ public class JobService {
         schedule(qualifier, 0L);
     }
 
+    @ActivateRequestContext
     void executeJob(final JobQualifier qualifier, final Long resourceId) {
         final var executor = executors.get(qualifier);
         if (Objects.nonNull(executor)) {

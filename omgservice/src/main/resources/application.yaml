@@ -31,6 +31,12 @@ quarkus:
     instance-name: omgservice
     cluster-checkin-interval: 5000
   keycloak:
+    admin-client:
+      server-url: ${AUTH_SERVER_URL}
+      realm: ${AUTH_REALM}
+      client-id: ${AUTH_CLIENT_ID}
+      client-secret: ${AUTH_CLIENT_SECRET}
+      grant-type: CLIENT_CREDENTIALS
     policy-enforcer:
       enable: true
       lazy-load-paths: false
@@ -39,7 +45,7 @@ quarkus:
           path: /q/*
           enforcement-mode: DISABLED
   oidc:
-    auth-server-url: ${AUTH_SERVER_URL}
+    auth-server-url: ${AUTH_SERVER_URL}/realms/${AUTH_REALM}
     client-id: ${AUTH_CLIENT_ID}
     credentials:
       secret: ${AUTH_CLIENT_SECRET}

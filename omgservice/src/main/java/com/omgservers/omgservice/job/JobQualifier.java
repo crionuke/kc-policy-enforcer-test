@@ -13,13 +13,25 @@ public enum JobQualifier {
                 .orElseThrow();
     }
 
-    public final String identity;
-    public final String group;
-    public final int interval;
+    final String identity;
+    final String group;
+    final int interval;
 
     JobQualifier(final String identity, final String group, final int interval) {
         this.identity = identity;
         this.group = group;
         this.interval = interval;
+    }
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public int getInterval() {
+        return interval;
     }
 }

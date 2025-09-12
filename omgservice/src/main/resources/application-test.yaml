@@ -5,13 +5,16 @@ quarkus:
     password: omgservice
     jdbc:
       url: jdbc:postgresql://localhost:5432/omgservers?current_schema=omgservice
+  keycloak:
+    admin-client:
+      server-url: http://localhost:8000
+      realm: omgservers
+      client-id: omgservice
+      client-secret: omgservice
+      grant-type: CLIENT_CREDENTIALS
   oidc:
     auth-server-url: http://localhost:8000/realms/omgservers
     client-id: omgservice
     credentials:
       secret: omgservice
-  oidc-client:
-    auth-server-url: ${quarkus.oidc.auth-server-url}
-    client-id: omgservice
-    credentials:
-      secret: omgservice
+
