@@ -3,13 +3,17 @@ quarkus:
     name: ${APPLICATION_NAME:omgservice}
   datasource:
     db-kind: postgresql
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    jdbc:
+      url: ${DATABASE_URL}
   hibernate-orm:
     mapping:
       format:
         global: ignore
   flyway:
     enabled: true
-    migrate-at-start: ${MIGRATE_AT_START:true}
+    migrate-at-start: ${MIGRATION_ENABLED:true}
   container-image:
     group: omgservers
     name: omgservice
@@ -35,4 +39,7 @@ quarkus:
           path: /q/*
           enforcement-mode: DISABLED
   oidc:
-    client-id: omgservice
+    auth-server-url: ${AUTH_SERVER_URL}
+    client-id: ${AUTH_CLIENT_ID}
+    credentials:
+      secret: ${AUTH_CLIENT_SECRET}

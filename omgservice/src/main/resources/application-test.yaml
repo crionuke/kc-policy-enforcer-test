@@ -10,3 +10,8 @@ quarkus:
     client-id: omgservice
     credentials:
       secret: omgservice
+  oidc-client:
+    auth-server-url: ${quarkus.oidc.auth-server-url}
+    client-id: omgservice
+    credentials:
+      secret: omgservice

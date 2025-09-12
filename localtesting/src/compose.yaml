@@ -5,6 +5,9 @@ services:
     image: "postgres:17.6"
     container_name: "postgres"
     restart: unless-stopped
+    profiles:
+      - localtesting
+      - standalone
     environment:
       POSTGRES_USER: "omgservers"
       POSTGRES_PASSWORD: "omgservers"
@@ -20,6 +23,9 @@ services:
     image: redis:8.2
     container_name: "redis"
     restart: unless-stopped
+    profiles:
+      - localtesting
+      - standalone
     ports:
       - "6379:6379"
     networks:
@@ -29,6 +35,9 @@ services:
     container_name: "keycloak"
     restart: unless-stopped
     entrypoint: /opt/keycloak/bin/kc.sh start-dev --import-realm
+    profiles:
+      - localtesting
+      - standalone
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/omgservers
@@ -43,18 +52,21 @@ services:
       - "8000:8080"
     networks:
       - omgservers
-#    volumes:
-#      - ./omgplayers-realm.json:/opt/keycloak/data/import/omgplayers-realm.json:r
-#      - ./omgservers-realm.json:/opt/keycloak/data/import/omgservers-realm.json:r
+    volumes:
+      - ./omgservers-realm.json:/opt/keycloak/data/import/omgservers-realm.json:r
   omgservice:
     image: "omgservers/omgservice:${OMGSERVERS_VERSION}"
     container_name: "omgservice"
     restart: unless-stopped
+    profiles:
+      - standalone
     environment:
       DATABASE_URL: jdbc:postgresql://postgres:5432/omgservers?current_schema=omgservice
       DATABASE_USERNAME: omgservice
       DATABASE_PASSWORD: omgservice
       AUTH_SERVER_URL: http://keycloak:8080/realms/omgservers
+      AUTH_CLIENT_ID: omgservice
+      AUTH_CLIENT_SECRET: omgservice
     ports:
       - "8001:8080"
     networks:
