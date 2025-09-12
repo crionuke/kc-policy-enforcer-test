@@ -12,6 +12,7 @@ import com.omgservers.omgservice.version.VersionResourceTest;
 import com.omgservers.omgservice.version.VersionStatus;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 @ApplicationScoped
+@TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(DeploymentResource.class)
 public class DeploymentResourceTest extends Assertions {
 

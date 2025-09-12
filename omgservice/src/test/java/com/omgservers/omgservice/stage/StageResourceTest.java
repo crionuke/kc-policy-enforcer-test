@@ -7,6 +7,7 @@ import com.omgservers.omgservice.tenant.TenantResourceTest;
 import com.omgservers.omgservice.tenant.TenantStatus;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
+@TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(StageResource.class)
 public class StageResourceTest {
 

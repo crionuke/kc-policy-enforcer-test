@@ -4,6 +4,7 @@ import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 @ApplicationScoped
+@TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(TenantResource.class)
 public class TenantResourceTest {
 
@@ -27,6 +29,7 @@ public class TenantResourceTest {
         return testTenant;
     }
 
+    @Transactional
     public Tenant persistTestTenant() {
         return persistTestTenant(TenantStatus.CREATED);
     }

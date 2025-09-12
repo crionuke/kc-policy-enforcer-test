@@ -10,9 +10,12 @@ import org.slf4j.LoggerFactory;
 public class EventProcessor implements JobExecutor {
     private static final Logger log = LoggerFactory.getLogger(EventProcessor.class);
 
+    final EventHandlers eventHandlers;
     final EventService eventService;
 
-    public EventProcessor(final EventService eventService) {
+    public EventProcessor(final EventHandlers eventHandlers,
+                          final EventService eventService) {
+        this.eventHandlers = eventHandlers;
         this.eventService = eventService;
     }
 
@@ -28,7 +31,7 @@ public class EventProcessor implements JobExecutor {
             log.info("Handling {} events", eventsForHandling.size());
             eventsForHandling.forEach(event -> {
                 try {
-                    eventService.handle(event);
+                    eventHandlers.handle(event);
                     eventService.deleteAndMark(event, false);
                 } catch (Exception e) {
                     log.error("Event {} failed, {}", event.id, e.getMessage(), e);
