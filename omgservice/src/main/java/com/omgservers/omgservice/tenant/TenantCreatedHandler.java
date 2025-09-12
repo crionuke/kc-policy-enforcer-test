@@ -25,11 +25,11 @@ public class TenantCreatedHandler implements EventHandler {
 
     @Override
     public void handle(final Long resourceId) {
-        final var resource = tenantAuthzService.createResourceIfAny(resourceId);
-
         final var viewersGroup = tenantAuthzService.createViewersGroupIfAny(resourceId);
         final var managersGroup = tenantAuthzService.createManagersGroupIfAny(resourceId);
         final var adminsGroup = tenantAuthzService.createAdminsGroupIfAny(resourceId);
+
+        final var resource = tenantAuthzService.createResourceIfAny(resourceId);
 
         final var viewersPolicy = tenantAuthzService.createViewersPolicyIfAny(resourceId, viewersGroup);
         final var managersPolicy = tenantAuthzService.createManagersPolicyIfAny(resourceId, managersGroup);
