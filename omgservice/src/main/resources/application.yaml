@@ -49,3 +49,7 @@ quarkus:
     client-id: ${AUTH_CLIENT_ID}
     credentials:
       secret: ${AUTH_CLIENT_SECRET}
+omgservice:
+  event:
+    processor:
+      enabled: true

@@ -14,28 +14,7 @@ import java.util.Set;
 @ApplicationScoped
 public class TenantAuthzService {
 
-    static private final String VIEW_SCOPE = "scope:omg:tenant:view";
-    static private final String MANAGE_SCOPE = "scope:omg:tenant:manage";
-    static private final String ADMIN_SCOPE = "scope:omg:tenant:admin";
-
-    static private final String RESOURCE_NAME = "resource:omg:tenant:%d";
-    static private final String RESOURCE_DISPLAY_NAME = "Tenant %d";
-    static private final String RESOURCE_TYPE = "type:omg:tenant";
-    static private final String RESOURCE_URI = "/tenant/%d";
-
-    static private final String VIEWERS_GROUP_NAME = "group:omg:tenant:%d:viewers";
-    static private final String MANAGERS_GROUP_NAME = "group:omg:tenant:%d:managers";
-    static private final String ADMINS_GROUP_NAME = "group:omg:tenant:%d:admins";
-
-    static private final String VIEWERS_POLICY_NAME = "policy:omg:tenant:%d:viewers";
-    static private final String MANAGERS_POLICY_NAME = "policy:omg:tenant:%d:managers";
-    static private final String ADMINS_POLICY_NAME = "policy:omg:tenant:%d:admins";
-
-    static private final String VIEW_PERMISSION_NAME = "permission:omg:tenant:%d:view";
-    static private final String MANAGE_PERMISSION_NAME = "permission:omg:tenant:%d:manage";
-    static private final String ADMIN_PERMISSION_NAME = "permission:omg:tenant:%d:admin";
-
-    static private final String TENANT_ATTRIBUTE_TENANT_ID = "tenant_id";
+    static private final String TENANT_ID_ATTRIBUTE = "tenant_id";
 
     final AuthzService authzService;
 
@@ -43,69 +22,116 @@ public class TenantAuthzService {
         this.authzService = authzService;
     }
 
-    public ResourceRepresentation createResourceIfAny(final Long tenantId) {
-        final var name = RESOURCE_NAME.formatted(tenantId);
+    public String getResourceName(final Long tenantId) {
+        return "resource:omg:tenant:%d".formatted(tenantId);
+    }
 
-        return authzService.createResourceIfAny(tenantId,
-                name,
-                RESOURCE_TYPE,
-                RESOURCE_DISPLAY_NAME.formatted(tenantId),
-                RESOURCE_URI.formatted(tenantId),
-                Set.of(VIEW_SCOPE, MANAGE_SCOPE, ADMIN_SCOPE),
-                Map.of(TENANT_ATTRIBUTE_TENANT_ID, List.of(tenantId.toString())));
+    public String getResourceType() {
+        return "type:omg:tenant";
+    }
+
+    public ResourceRepresentation createResourceIfAny(final Long tenantId) {
+        final var name = getResourceName(tenantId);
+
+        final var scopeNames = Set.of(TenantScope.VIEW.getName(),
+                TenantScope.MANAGE.getName(),
+                TenantScope.ADMIN.getName());
+
+        return authzService.createResourceIfAny(name,
+                getResourceType(),
+                "Tenant %d".formatted(tenantId),
+                "/tenant/%d".formatted(tenantId),
+                scopeNames,
+                Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
+    }
+
+    public String getViewersGroupName(final Long tenantId) {
+        return "group:omg:tenant:%d:viewers".formatted(tenantId);
     }
 
     public GroupRepresentation createViewersGroupIfAny(final Long tenantId) {
-        final var name = VIEWERS_GROUP_NAME.formatted(tenantId);
-        return authzService.createGroupIfAny(tenantId, name);
+        final var name = getViewersGroupName(tenantId);
+        return authzService.createGroupIfAny(name);
+    }
+
+    public String getManagersGroupName(final Long tenantId) {
+        return "group:omg:tenant:%d:managers".formatted(tenantId);
     }
 
     public GroupRepresentation createManagersGroupIfAny(final Long tenantId) {
-        final var name = MANAGERS_GROUP_NAME.formatted(tenantId);
-        return authzService.createGroupIfAny(tenantId, name);
+        final var name = getManagersGroupName(tenantId);
+        return authzService.createGroupIfAny(name);
+    }
+
+    public String getAdminsGroupName(final Long tenantId) {
+        return "group:omg:tenant:%d:admins".formatted(tenantId);
     }
 
     public GroupRepresentation createAdminsGroupIfAny(final Long tenantId) {
-        final var name = ADMINS_GROUP_NAME.formatted(tenantId);
-        return authzService.createGroupIfAny(tenantId, name);
+        final var name = getAdminsGroupName(tenantId);
+        return authzService.createGroupIfAny(name);
+    }
+
+    public String getViewersPolicyName(final Long tenantId) {
+        return "policy:omg:tenant:%d:viewers".formatted(tenantId);
     }
 
     public PolicyRepresentation createViewersPolicyIfAny(final Long tenantId,
                                                          final GroupRepresentation viewersGroup) {
-        final var name = VIEWERS_POLICY_NAME.formatted(tenantId);
-        return authzService.createPolicyIfAny(tenantId, name, Set.of(viewersGroup));
+        final var name = getViewersPolicyName(tenantId);
+        return authzService.createPolicyIfAny(name, Set.of(viewersGroup));
+    }
+
+    public String getManagersPolicyName(final Long tenantId) {
+        return "policy:omg:tenant:%d:managers".formatted(tenantId);
     }
 
     public PolicyRepresentation createManagersPolicyIfAny(final Long tenantId,
                                                           final GroupRepresentation managersGroup) {
-        final var name = MANAGERS_POLICY_NAME.formatted(tenantId);
-        return authzService.createPolicyIfAny(tenantId, name, Set.of(managersGroup));
+        final var name = getManagersPolicyName(tenantId);
+        return authzService.createPolicyIfAny(name, Set.of(managersGroup));
+    }
+
+    public String getAdminsPolicyName(final Long tenantId) {
+        return "policy:omg:tenant:%d:admins".formatted(tenantId);
     }
 
     public PolicyRepresentation createAdminsPolicyIfAny(final Long tenantId,
                                                         final GroupRepresentation adminsGroup) {
-        final var name = ADMINS_POLICY_NAME.formatted(tenantId);
-        return authzService.createPolicyIfAny(tenantId, name, Set.of(adminsGroup));
+        final var name = getAdminsPolicyName(tenantId);
+        return authzService.createPolicyIfAny(name, Set.of(adminsGroup));
+    }
+
+    public String getViewPermissionName(final Long tenantId) {
+        return "permission:omg:tenant:%d:view".formatted(tenantId);
     }
 
     public ScopePermissionRepresentation createViewPermissionIfAny(final Long tenantId,
                                                                    final ResourceRepresentation resource,
                                                                    final Set<PolicyRepresentation> policies) {
-        final var name = VIEW_PERMISSION_NAME.formatted(tenantId);
-        return authzService.createPermissionIfAny(tenantId, name, resource, VIEW_SCOPE, policies);
+        final var name = getViewPermissionName(tenantId);
+        return authzService.createPermissionIfAny(name, resource, TenantScope.VIEW.getName(), policies);
+    }
+
+    public String getManagePermissionName(final Long tenantId) {
+        return "permission:omg:tenant:%d:manage".formatted(tenantId);
     }
 
     public ScopePermissionRepresentation createManagePermissionIfAny(final Long tenantId,
                                                                      final ResourceRepresentation resource,
                                                                      final Set<PolicyRepresentation> policies) {
-        final var name = MANAGE_PERMISSION_NAME.formatted(tenantId);
-        return authzService.createPermissionIfAny(tenantId, name, resource, MANAGE_SCOPE, policies);
+        final var name = getManagePermissionName(tenantId);
+        return authzService.createPermissionIfAny(name, resource, TenantScope.MANAGE.getName(), policies);
+    }
+
+    public String getAdminPermissionName(final Long tenantId) {
+        return "permission:omg:tenant:%d:admin".formatted(tenantId);
     }
 
     public ScopePermissionRepresentation createAdminPermissionIfAny(final Long tenantId,
                                                                     final ResourceRepresentation resource,
                                                                     final Set<PolicyRepresentation> policies) {
-        final var name = ADMIN_PERMISSION_NAME.formatted(tenantId);
-        return authzService.createPermissionIfAny(tenantId, name, resource, ADMIN_SCOPE, policies);
+        final var name = getAdminPermissionName(tenantId);
+        return authzService.createPermissionIfAny(name, resource, TenantScope.ADMIN.getName(), policies);
     }
 }

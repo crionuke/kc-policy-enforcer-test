@@ -52,12 +52,12 @@ public class AuthzService {
         return clientResource.authorization();
     }
 
-    public GroupRepresentation createGroupIfAny(final Long resourceId, final String name) {
+    public GroupRepresentation createGroupIfAny(final String name) {
         final var resource = getGroupsResource();
 
         final var groups = resource.groups(name, 0, 1);
         if (!groups.isEmpty()) {
-            log.warn("Group {} for {} already exists", name, resourceId);
+            log.warn("Group {} already exists", name);
             return groups.getFirst();
         }
 
@@ -67,7 +67,7 @@ public class AuthzService {
         try (final var response = resource.add(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdGroup = resource.groups(name, 0, 1).getFirst();
-                log.info("Created group {} for {}", name, resourceId);
+                log.info("Created group {}", name);
 
                 return createdGroup;
             } else {
@@ -76,18 +76,17 @@ public class AuthzService {
         }
     }
 
-    public ResourceRepresentation createResourceIfAny(final Long resourceId,
-                                                      final String name,
+    public ResourceRepresentation createResourceIfAny(final String name,
                                                       final String type,
                                                       final String displayName,
                                                       final String uri,
-                                                      final Set<String> scopes,
+                                                      final Set<String> scopeNames,
                                                       final Map<String, List<String>> attributes) {
         final var resource = getAuthorizationResource().resources();
 
         final var resources = resource.findByName(name);
         if (!resources.isEmpty()) {
-            log.warn("Resource {} for {} already exists", name, resourceId);
+            log.warn("Resource {} already exists", name);
             return resources.getFirst();
         }
 
@@ -96,7 +95,7 @@ public class AuthzService {
         representation.setType(type);
         representation.setDisplayName(displayName);
         representation.setUris(Set.of(uri));
-        final var scopeRepresentations = scopes.stream()
+        final var scopeRepresentations = scopeNames.stream()
                 .map(ScopeRepresentation::new)
                 .collect(Collectors.toSet());
         representation.setScopes(scopeRepresentations);
@@ -105,7 +104,7 @@ public class AuthzService {
         try (final var response = resource.create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = resource.findByName(name).getFirst();
-                log.info("Created resource {} for {}", name, resourceId);
+                log.info("Created resource {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create resource " + name);
@@ -113,14 +112,13 @@ public class AuthzService {
         }
     }
 
-    public PolicyRepresentation createPolicyIfAny(final Long resourceId,
-                                                  final String name,
+    public PolicyRepresentation createPolicyIfAny(final String name,
                                                   final Set<GroupRepresentation> groups) {
         final var policiesResource = getAuthorizationResource().policies();
 
         final var policy = policiesResource.findByName(name);
         if (Objects.nonNull(policy)) {
-            log.warn("Policy {} for {} already exists", name, resourceId);
+            log.warn("Policy {} already exists", name);
             return policy;
         }
 
@@ -135,7 +133,7 @@ public class AuthzService {
         try (final var response = policiesResource.group().create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = policiesResource.findByName(name);
-                log.info("Created policy {} for {}", name, resourceId);
+                log.info("Created policy {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create policy " + name);
@@ -143,8 +141,7 @@ public class AuthzService {
         }
     }
 
-    public ScopePermissionRepresentation createPermissionIfAny(final Long resourceId,
-                                                               final String name,
+    public ScopePermissionRepresentation createPermissionIfAny(final String name,
                                                                final ResourceRepresentation resource,
                                                                final String scope,
                                                                final Set<PolicyRepresentation> policies) {
@@ -152,7 +149,7 @@ public class AuthzService {
 
         final var permission = permissionsResource.findByName(name);
         if (Objects.nonNull(permission)) {
-            log.warn("Permission {} for {} already exists", name, resourceId);
+            log.warn("Permission {} already exists", name);
             return permission;
         }
 
@@ -167,7 +164,7 @@ public class AuthzService {
         try (final var response = permissionsResource.create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = permissionsResource.findByName(name);
-                log.info("Created permission {} for {}", name, resourceId);
+                log.info("Created permission {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create permission");

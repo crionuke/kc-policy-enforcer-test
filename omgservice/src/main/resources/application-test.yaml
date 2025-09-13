@@ -17,4 +17,7 @@ quarkus:
     client-id: omgservice
     credentials:
       secret: omgservice
-
+omgservice:
+  event:
+    processor:
+      enabled: false

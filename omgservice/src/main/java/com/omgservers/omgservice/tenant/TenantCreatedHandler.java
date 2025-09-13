@@ -3,11 +3,14 @@ package com.omgservers.omgservice.tenant;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 @ApplicationScoped
 public class TenantCreatedHandler implements EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantCreatedHandler.class);
 
     final TenantAuthzService tenantAuthzService;
     final TenantService tenantService;
@@ -25,6 +28,8 @@ public class TenantCreatedHandler implements EventHandler {
 
     @Override
     public void handle(final Long resourceId) {
+        LOGGER.info("Creating tenant {}", resourceId);
+
         final var viewersGroup = tenantAuthzService.createViewersGroupIfAny(resourceId);
         final var managersGroup = tenantAuthzService.createManagersGroupIfAny(resourceId);
         final var adminsGroup = tenantAuthzService.createAdminsGroupIfAny(resourceId);
