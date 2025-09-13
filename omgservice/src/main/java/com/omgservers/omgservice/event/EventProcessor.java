@@ -47,7 +47,7 @@ public class EventProcessor implements JobExecutor {
                     eventHandlers.handle(event);
                     eventService.deleteAndMark(event, false);
                 } catch (Exception e) {
-                    LOGGER.error("Event {} failed, {}", event.id, e.getMessage(), e);
+                    LOGGER.error("Event {} failed. {}", event.id, e.getMessage(), e);
                     eventService.deleteAndMark(event, true);
                 }
             });

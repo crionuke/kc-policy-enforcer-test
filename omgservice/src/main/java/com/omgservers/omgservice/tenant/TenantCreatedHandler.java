@@ -30,20 +30,24 @@ public class TenantCreatedHandler implements EventHandler {
     public void handle(final Long resourceId) {
         LOGGER.info("Creating tenant {}", resourceId);
 
-        final var viewersGroup = tenantAuthzService.createViewersGroupIfAny(resourceId);
-        final var managersGroup = tenantAuthzService.createManagersGroupIfAny(resourceId);
-        final var adminsGroup = tenantAuthzService.createAdminsGroupIfAny(resourceId);
+        final var viewersGroup = tenantAuthzService.createViewersGroup(resourceId);
+        final var managersGroup = tenantAuthzService.createManagersGroup(resourceId);
+        final var adminsGroup = tenantAuthzService.createAdminsGroup(resourceId);
 
-        final var resource = tenantAuthzService.createResourceIfAny(resourceId);
+        final var tenantResource = tenantAuthzService.createResource(resourceId);
 
-        final var viewersPolicy = tenantAuthzService.createViewersPolicyIfAny(resourceId, viewersGroup);
-        final var managersPolicy = tenantAuthzService.createManagersPolicyIfAny(resourceId, managersGroup);
-        final var adminsPolicy = tenantAuthzService.createAdminsPolicyIfAny(resourceId, adminsGroup);
+        final var viewersPolicy = tenantAuthzService.createViewersPolicy(resourceId, viewersGroup);
+        final var managersPolicy = tenantAuthzService.createManagersPolicy(resourceId, managersGroup);
+        final var adminsPolicy = tenantAuthzService.createAdminsPolicy(resourceId, adminsGroup);
 
         final var viewPermissionPolicies = Set.of(viewersPolicy, managersPolicy, adminsPolicy);
-        tenantAuthzService.createViewPermissionIfAny(resourceId, resource, viewPermissionPolicies);
-        tenantAuthzService.createManagePermissionIfAny(resourceId, resource, Set.of(managersPolicy, adminsPolicy));
-        tenantAuthzService.createAdminPermissionIfAny(resourceId, resource, Set.of(adminsPolicy));
+        tenantAuthzService.createViewPermission(resourceId, tenantResource, viewPermissionPolicies);
+
+        final var managePermissionPolicies = Set.of(managersPolicy, adminsPolicy);
+        tenantAuthzService.createManagePermission(resourceId, tenantResource, managePermissionPolicies);
+
+        final var adminPermissionPolicies = Set.of(adminsPolicy);
+        tenantAuthzService.createAdminPermission(resourceId, tenantResource, adminPermissionPolicies);
 
         tenantService.switchStateFromCreatingToCreated(resourceId);
     }

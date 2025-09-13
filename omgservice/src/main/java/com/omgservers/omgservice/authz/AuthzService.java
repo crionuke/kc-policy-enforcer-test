@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.authz;
 
+import com.omgservers.omgservice.errors.PolicyNotFound;
 import io.quarkus.keycloak.admin.client.common.runtime.KeycloakAdminClientConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -37,22 +38,7 @@ public class AuthzService {
         this.keycloak = keycloak;
     }
 
-    public GroupsResource getGroupsResource() {
-        final var realm = config.realm();
-        return keycloak.realm(realm).groups();
-    }
-
-    public AuthorizationResource getAuthorizationResource() {
-        final var realm = config.realm();
-        final var clients = keycloak.realm(realm).clients();
-        final var clientId = config.clientId();
-        final var representation = clients.findByClientId(clientId).getFirst();
-        final var internalId = representation.getId();
-        final var clientResource = clients.get(internalId);
-        return clientResource.authorization();
-    }
-
-    public GroupRepresentation createGroupIfAny(final String name) {
+    public GroupRepresentation createGroup(final String name) {
         final var resource = getGroupsResource();
 
         final var groups = resource.groups(name, 0, 1);
@@ -76,12 +62,12 @@ public class AuthzService {
         }
     }
 
-    public ResourceRepresentation createResourceIfAny(final String name,
-                                                      final String type,
-                                                      final String displayName,
-                                                      final String uri,
-                                                      final Set<String> scopeNames,
-                                                      final Map<String, List<String>> attributes) {
+    public ResourceRepresentation createResource(final String name,
+                                                 final String type,
+                                                 final String displayName,
+                                                 final String uri,
+                                                 final Set<String> scopeNames,
+                                                 final Map<String, List<String>> attributes) {
         final var resource = getAuthorizationResource().resources();
 
         final var resources = resource.findByName(name);
@@ -112,8 +98,18 @@ public class AuthzService {
         }
     }
 
-    public PolicyRepresentation createPolicyIfAny(final String name,
-                                                  final Set<GroupRepresentation> groups) {
+    public PolicyRepresentation findPolicyByNameRequired(final String name) {
+        final var policiesResource = getAuthorizationResource().policies();
+        final var policy = policiesResource.findByName(name);
+        if (Objects.isNull(policy)) {
+            throw new PolicyNotFound(name);
+        }
+
+        return policy;
+    }
+
+    public PolicyRepresentation createPolicy(final String name,
+                                             final Set<GroupRepresentation> groups) {
         final var policiesResource = getAuthorizationResource().policies();
 
         final var policy = policiesResource.findByName(name);
@@ -141,10 +137,10 @@ public class AuthzService {
         }
     }
 
-    public ScopePermissionRepresentation createPermissionIfAny(final String name,
-                                                               final ResourceRepresentation resource,
-                                                               final String scope,
-                                                               final Set<PolicyRepresentation> policies) {
+    public ScopePermissionRepresentation createPermission(final String name,
+                                                          final ResourceRepresentation resource,
+                                                          final String scope,
+                                                          final Set<PolicyRepresentation> policies) {
         final var permissionsResource = getAuthorizationResource().permissions().scope();
 
         final var permission = permissionsResource.findByName(name);
@@ -170,5 +166,20 @@ public class AuthzService {
                 throw new InternalServerErrorException("Failed to create permission");
             }
         }
+    }
+
+    GroupsResource getGroupsResource() {
+        final var realm = config.realm();
+        return keycloak.realm(realm).groups();
+    }
+
+    AuthorizationResource getAuthorizationResource() {
+        final var realm = config.realm();
+        final var clients = keycloak.realm(realm).clients();
+        final var clientId = config.clientId();
+        final var representation = clients.findByClientId(clientId).getFirst();
+        final var internalId = representation.getId();
+        final var clientResource = clients.get(internalId);
+        return clientResource.authorization();
     }
 }
