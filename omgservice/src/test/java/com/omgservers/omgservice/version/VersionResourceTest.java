@@ -92,7 +92,6 @@ public class VersionResourceTest {
         newVersion.major = 1L;
         newVersion.minor = 0L;
         newVersion.patch = 0L;
-        newVersion.config = createVersionConfig();
 
         final var version = given()
                 .pathParam("projectId", testProject.id)
@@ -143,7 +142,6 @@ public class VersionResourceTest {
         newVersion.major = 1L;
         newVersion.minor = 0L;
         newVersion.patch = 0L;
-        newVersion.config = createVersionConfig();
 
         given()
                 .pathParam("projectId", testProject.id)
@@ -164,15 +162,10 @@ public class VersionResourceTest {
         version.minor = 0L;
         version.patch = 0L;
         version.status = status;
-        version.config = createVersionConfig();
+        version.config = new VersionConfig();
+        version.config.version = VersionConfigVersion.V1;
         version.persist();
 
         return version;
-    }
-
-    private VersionConfig createVersionConfig() {
-        final var config = new VersionConfig();
-        config.version = VersionConfigVersion.V1;
-        return config;
     }
 }

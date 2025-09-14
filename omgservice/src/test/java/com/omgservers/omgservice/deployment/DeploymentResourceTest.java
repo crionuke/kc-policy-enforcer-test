@@ -133,7 +133,6 @@ public class DeploymentResourceTest extends Assertions {
 
         final var newDeployment = new NewDeployment();
         newDeployment.versionId = testVersion.id;
-        newDeployment.config = createDeploymentConfig();
 
         final var deployment = given()
                 .pathParam("stageId", testStage.id)
@@ -185,7 +184,6 @@ public class DeploymentResourceTest extends Assertions {
 
         final var newDeployment = new NewDeployment();
         newDeployment.versionId = testVersion.id;
-        newDeployment.config = createDeploymentConfig();
 
         given()
                 .pathParam("stageId", testStage.id)
@@ -208,7 +206,6 @@ public class DeploymentResourceTest extends Assertions {
 
         final var newDeployment = new NewDeployment();
         newDeployment.versionId = testVersion.id;
-        newDeployment.config = createDeploymentConfig();
 
         given()
                 .pathParam("stageId", testStage.id)
@@ -227,15 +224,10 @@ public class DeploymentResourceTest extends Assertions {
         deployment.stage = stage;
         deployment.version = version;
         deployment.status = DeploymentStatus.CREATED;
-        deployment.config = createDeploymentConfig();
+        deployment.config = new DeploymentConfig();
+        deployment.config.version = DeploymentConfigVersion.V1;
         deployment.persist();
 
         return deployment;
-    }
-
-    private DeploymentConfig createDeploymentConfig() {
-        final var config = new DeploymentConfig();
-        config.version = DeploymentConfigVersion.V1;
-        return config;
     }
 }

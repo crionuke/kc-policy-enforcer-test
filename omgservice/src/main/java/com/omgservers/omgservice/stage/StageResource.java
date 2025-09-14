@@ -45,7 +45,8 @@ public class StageResource {
         stage.tenant = tenant;
         stage.name = newStage.name;
         stage.status = StageStatus.CREATING;
-        stage.config = newStage.config;
+        stage.config = new StageConfig();
+        stage.config.version = StageConfigVersion.V1;
         stage.persist();
 
         eventService.create(EventQualifier.STAGE_CREATED, stage.id);

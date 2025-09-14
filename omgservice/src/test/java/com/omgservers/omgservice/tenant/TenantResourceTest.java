@@ -69,7 +69,6 @@ public class TenantResourceTest {
     void testCreateTenantSuccess() {
         final var newTenant = new NewTenant();
         newTenant.name = "New tenant";
-        newTenant.config = createTenantConfig();
 
         final var tenant = given()
                 .contentType(ContentType.JSON)
@@ -108,15 +107,10 @@ public class TenantResourceTest {
         final var tenant = new Tenant();
         tenant.name = "Test tenant";
         tenant.status = status;
-        tenant.config = createTenantConfig();
+        tenant.config = new TenantConfig();
+        tenant.config.version = TenantConfigVersion.V1;
         tenant.persist();
 
         return tenant;
-    }
-
-    private TenantConfig createTenantConfig() {
-        final var config = new TenantConfig();
-        config.version = TenantConfigVersion.V1;
-        return config;
     }
 }

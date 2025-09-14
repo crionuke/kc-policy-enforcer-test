@@ -45,7 +45,8 @@ public class ProjectResource {
         project.tenant = tenant;
         project.name = newProject.name;
         project.status = ProjectStatus.CREATING;
-        project.config = newProject.config;
+        project.config = new ProjectConfig();
+        project.config.version = ProjectConfigVersion.V1;
         project.persist();
 
         eventService.create(EventQualifier.PROJECT_CREATED, project.id);

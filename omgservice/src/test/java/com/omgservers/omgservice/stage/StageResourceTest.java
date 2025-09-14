@@ -78,7 +78,6 @@ public class StageResourceTest {
 
         final var newStage = new NewStage();
         newStage.name = "New stage";
-        newStage.config = createStageConfig();
 
         final var stage = given()
                 .pathParam("tenantId", testTenant.id)
@@ -122,7 +121,6 @@ public class StageResourceTest {
 
         final var newStage = new NewStage();
         newStage.name = "New stage";
-        newStage.config = createStageConfig();
 
         given()
                 .pathParam("tenantId", testTenant.id)
@@ -141,15 +139,10 @@ public class StageResourceTest {
         stage.tenant = tenant;
         stage.name = "Test stage";
         stage.status = status;
-        stage.config = createStageConfig();
+        stage.config = new StageConfig();
+        stage.config.version = StageConfigVersion.V1;
         stage.persist();
 
         return stage;
-    }
-
-    private StageConfig createStageConfig() {
-        final var config = new StageConfig();
-        config.version = StageConfigVersion.V1;
-        return config;
     }
 }

@@ -80,7 +80,6 @@ public class ProjectResourceTest {
 
         final var newProject = new NewProject();
         newProject.name = "New project";
-        newProject.config = createProjectConfig();
 
         final var project = given()
                 .pathParam("tenantId", testTenant.id)
@@ -125,7 +124,6 @@ public class ProjectResourceTest {
 
         final var newProject = new NewProject();
         newProject.name = "New project";
-        newProject.config = createProjectConfig();
 
         given()
                 .pathParam("tenantId", testTenant.id)
@@ -144,15 +142,10 @@ public class ProjectResourceTest {
         project.tenant = tenant;
         project.name = "Test project";
         project.status = status;
-        project.config = createProjectConfig();
+        project.config = new ProjectConfig();
+        project.config.version = ProjectConfigVersion.V1;
         project.persist();
 
         return project;
-    }
-
-    private ProjectConfig createProjectConfig() {
-        final var config = new ProjectConfig();
-        config.version = ProjectConfigVersion.V1;
-        return config;
     }
 }

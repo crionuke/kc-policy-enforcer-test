@@ -47,7 +47,8 @@ public class VersionResource {
         version.minor = newVersion.minor;
         version.patch = newVersion.patch;
         version.status = VersionStatus.CREATING;
-        version.config = newVersion.config;
+        version.config = new VersionConfig();
+        version.config.version = VersionConfigVersion.V1;
         version.persist();
 
         eventService.create(EventQualifier.VERSION_CREATED, version.id);

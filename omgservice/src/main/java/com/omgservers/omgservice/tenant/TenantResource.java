@@ -38,7 +38,8 @@ public class TenantResource {
         final var tenant = new Tenant();
         tenant.name = newTenant.name;
         tenant.status = TenantStatus.CREATING;
-        tenant.config = newTenant.config;
+        tenant.config = new TenantConfig();
+        tenant.config.version = TenantConfigVersion.V1;
         tenant.persist();
 
         eventService.create(EventQualifier.TENANT_CREATED, tenant.id);

@@ -61,7 +61,8 @@ public class DeploymentResource {
         deployment.stage = stage;
         deployment.version = version;
         deployment.status = DeploymentStatus.CREATING;
-        deployment.config = newDeployment.config;
+        deployment.config = new DeploymentConfig();
+        deployment.config.version = DeploymentConfigVersion.V1;
         deployment.persist();
 
         eventService.create(EventQualifier.DEPLOYMENT_CREATED, deployment.id);
