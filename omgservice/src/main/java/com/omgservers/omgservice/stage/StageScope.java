@@ -1,19 +1,19 @@
-package com.omgservers.omgservice.project;
+package com.omgservers.omgservice.stage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Arrays;
 
-public enum ProjectScope {
+public enum StageScope {
 
-    VIEW("scope:omg:project:view"),
-    MANAGE("scope:omg:project:manage"),
-    ADMIN("scope:omg:project:admin");
+    VIEW("scope:omg:stage:view"),
+    MANAGE("scope:omg:stage:manage"),
+    ADMIN("scope:omg:stage:admin");
 
     final String name;
 
-    ProjectScope(final String name) {
+    StageScope(final String name) {
         this.name = name;
     }
 
@@ -27,8 +27,8 @@ public enum ProjectScope {
     }
 
     @JsonCreator
-    public static ProjectScope fromString(final String name) {
-        return Arrays.stream(ProjectScope.values())
+    public static StageScope fromString(final String name) {
+        return Arrays.stream(StageScope.values())
                 .filter(value -> value.name.equals(name))
                 .findFirst()
                 .orElseThrow();

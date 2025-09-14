@@ -65,7 +65,7 @@ public class AuthzService {
     public ResourceRepresentation createResource(final String name,
                                                  final String type,
                                                  final String displayName,
-                                                 final String uri,
+                                                 final Set<String> uris,
                                                  final Set<String> scopeNames,
                                                  final Map<String, List<String>> attributes) {
         final var resource = getAuthorizationResource().resources();
@@ -80,7 +80,7 @@ public class AuthzService {
         representation.setName(name);
         representation.setType(type);
         representation.setDisplayName(displayName);
-        representation.setUris(Set.of(uri));
+        representation.setUris(uris);
         final var scopeRepresentations = scopeNames.stream()
                 .map(ScopeRepresentation::new)
                 .collect(Collectors.toSet());

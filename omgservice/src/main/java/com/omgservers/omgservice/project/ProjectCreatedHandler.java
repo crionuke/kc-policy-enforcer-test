@@ -42,14 +42,12 @@ public class ProjectCreatedHandler implements EventHandler {
         LOGGER.info("Creating project {}", resourceId);
 
         final var viewersGroup = projectAuthzService.createViewersGroup(resourceId);
-        final var developersGroup = projectAuthzService.createDevelopersGroup(resourceId);
         final var managersGroup = projectAuthzService.createManagersGroup(resourceId);
         final var adminsGroup = projectAuthzService.createAdminsGroup(resourceId);
 
         final var projectResource = projectAuthzService.createResource(tenantId, resourceId);
 
         final var projectViewersPolicy = projectAuthzService.createViewersPolicy(resourceId, viewersGroup);
-        final var projectDevelopersPolicy = projectAuthzService.createDevelopersPolicy(resourceId, developersGroup);
         final var projectManagersPolicy = projectAuthzService.createManagersPolicy(resourceId, managersGroup);
         final var projectAdminsPolicy = projectAuthzService.createAdminsPolicy(resourceId, adminsGroup);
 
@@ -62,18 +60,12 @@ public class ProjectCreatedHandler implements EventHandler {
         final var tenantAdminsPolicy = authzService.findPolicyByNameRequired(tenantAdminsPolicyName);
 
         final var viewPermissionPolicies = Set.of(projectViewersPolicy,
-                projectDevelopersPolicy,
                 projectManagersPolicy,
                 projectAdminsPolicy,
                 tenantViewersPolicy,
                 tenantManagersPolicy,
                 tenantAdminsPolicy);
         projectAuthzService.createViewPermission(resourceId, projectResource, viewPermissionPolicies);
-
-        final var developPermissionPolicies = Set.of(projectDevelopersPolicy,
-                projectAdminsPolicy,
-                tenantAdminsPolicy);
-        projectAuthzService.createDevelopPermission(resourceId, projectResource, developPermissionPolicies);
 
         final var managePermissionPolicies = Set.of(projectManagersPolicy,
                 projectAdminsPolicy,

@@ -35,14 +35,13 @@ public class ProjectAuthzService {
         final var name = getResourceName(projectId);
 
         final var scopeNames = Set.of(ProjectScope.VIEW.getName(),
-                ProjectScope.DEVELOP.getName(),
                 ProjectScope.MANAGE.getName(),
                 ProjectScope.ADMIN.getName());
 
         return authzService.createResource(name,
                 getResourceType(),
                 "Project %d".formatted(projectId),
-                "/project/%d".formatted(projectId),
+                Set.of("/project/%d/*".formatted(projectId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
@@ -54,15 +53,6 @@ public class ProjectAuthzService {
 
     public GroupRepresentation createViewersGroup(final Long projectId) {
         final var name = getViewersGroupName(projectId);
-        return authzService.createGroup(name);
-    }
-
-    public String getDevelopersGroupName(final Long projectId) {
-        return "group:omg:project:%d:developers".formatted(projectId);
-    }
-
-    public GroupRepresentation createDevelopersGroup(final Long projectId) {
-        final var name = getDevelopersGroupName(projectId);
         return authzService.createGroup(name);
     }
 
@@ -94,16 +84,6 @@ public class ProjectAuthzService {
         return authzService.createPolicy(name, Set.of(viewersGroup));
     }
 
-    public String getDevelopersPolicyName(final Long projectId) {
-        return "policy:omg:project:%d:developers".formatted(projectId);
-    }
-
-    public PolicyRepresentation createDevelopersPolicy(final Long projectId,
-                                                       final GroupRepresentation developersGroup) {
-        final var name = getDevelopersPolicyName(projectId);
-        return authzService.createPolicy(name, Set.of(developersGroup));
-    }
-
     public String getManagersPolicyName(final Long projectId) {
         return "policy:omg:project:%d:managers".formatted(projectId);
     }
@@ -133,17 +113,6 @@ public class ProjectAuthzService {
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(projectId);
         return authzService.createPermission(name, resource, ProjectScope.VIEW.getName(), policies);
-    }
-
-    public String getDevelopPermissionName(final Long projectId) {
-        return "permission:omg:project:%d:develop".formatted(projectId);
-    }
-
-    public ScopePermissionRepresentation createDevelopPermission(final Long projectId,
-                                                                 final ResourceRepresentation resource,
-                                                                 final Set<PolicyRepresentation> policies) {
-        final var name = getDevelopPermissionName(projectId);
-        return authzService.createPermission(name, resource, ProjectScope.DEVELOP.getName(), policies);
     }
 
     public String getManagePermissionName(final Long projectId) {
