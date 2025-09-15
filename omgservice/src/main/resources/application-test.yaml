@@ -17,6 +17,19 @@ quarkus:
     client-id: omgservice
     credentials:
       secret: omgservice
+  oidc-client:
+    admin:
+      client-enabled: true
+      auth-server-url: http://localhost:8000/realms/omgservers
+      client-id: omgservice
+      credentials:
+        secret: omgservice
+      grant:
+        type: password
+      grant-options:
+        password:
+          username: admin
+          password: admin
 omgservice:
   event:
     processor:

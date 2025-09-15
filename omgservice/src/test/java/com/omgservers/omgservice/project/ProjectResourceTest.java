@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.project;
 
+import com.omgservers.omgservice.OidcClients;
 import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.tenant.Tenant;
@@ -25,6 +26,9 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(ProjectResource.class)
 public class ProjectResourceTest {
+
+    @Inject
+    OidcClients oidcClients;
 
     @Inject
     TenantResourceTest tenantResourceTest;
@@ -82,6 +86,7 @@ public class ProjectResourceTest {
         newProject.name = "New project";
 
         final var project = given()
+                .auth().oauth2(oidcClients.getAdminAccessToken())
                 .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newProject)

@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.stage;
 
+import com.omgservers.omgservice.OidcClients;
 import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.tenant.Tenant;
@@ -23,6 +24,9 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(StageResource.class)
 public class StageResourceTest {
+
+    @Inject
+    OidcClients oidcClients;
 
     @Inject
     TenantResourceTest tenantResourceTest;
@@ -80,6 +84,7 @@ public class StageResourceTest {
         newStage.name = "New stage";
 
         final var stage = given()
+                .auth().oauth2(oidcClients.getAdminAccessToken())
                 .pathParam("tenantId", testTenant.id)
                 .contentType(ContentType.JSON)
                 .body(newStage)

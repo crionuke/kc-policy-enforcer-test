@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.version;
 
+import com.omgservers.omgservice.OidcClients;
 import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.project.Project;
@@ -26,6 +27,9 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(VersionResource.class)
 public class VersionResourceTest {
+
+    @Inject
+    OidcClients oidcClients;
 
     @Inject
     TenantResourceTest tenantResourceTest;
@@ -94,6 +98,7 @@ public class VersionResourceTest {
         newVersion.patch = 0L;
 
         final var version = given()
+                .auth().oauth2(oidcClients.getAdminAccessToken())
                 .pathParam("projectId", testProject.id)
                 .contentType(ContentType.JSON)
                 .body(newVersion)

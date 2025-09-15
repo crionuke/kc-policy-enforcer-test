@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.deployment;
 
+import com.omgservers.omgservice.OidcClients;
 import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.project.ProjectResourceTest;
@@ -31,6 +32,9 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(DeploymentResource.class)
 public class DeploymentResourceTest extends Assertions {
+
+    @Inject
+    OidcClients oidcClients;
 
     @Inject
     TenantResourceTest tenantResourceTest;
@@ -135,6 +139,7 @@ public class DeploymentResourceTest extends Assertions {
         newDeployment.versionId = testVersion.id;
 
         final var deployment = given()
+                .auth().oauth2(oidcClients.getAdminAccessToken())
                 .pathParam("stageId", testStage.id)
                 .contentType(ContentType.JSON)
                 .body(newDeployment)

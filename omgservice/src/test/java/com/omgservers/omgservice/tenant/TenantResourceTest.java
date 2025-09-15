@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.tenant;
 
+import com.omgservers.omgservice.OidcClients;
 import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -7,8 +8,11 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
@@ -21,6 +25,10 @@ import static org.hamcrest.Matchers.notNullValue;
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(TenantResource.class)
 public class TenantResourceTest {
+
+    private static final Logger log = LoggerFactory.getLogger(TenantResourceTest.class);
+    @Inject
+    OidcClients oidcClients;
 
     @Transactional
     public Tenant persistTestTenant(final TenantStatus status) {
@@ -71,6 +79,7 @@ public class TenantResourceTest {
         newTenant.name = "New tenant";
 
         final var tenant = given()
+                .auth().oauth2(oidcClients.getAdminAccessToken())
                 .contentType(ContentType.JSON)
                 .body(newTenant)
                 .when()
