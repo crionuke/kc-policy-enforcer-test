@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-@Path("/")
+@Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class VersionResource {
 

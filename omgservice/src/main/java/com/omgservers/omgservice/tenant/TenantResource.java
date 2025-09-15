@@ -13,7 +13,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
-@Path("/")
+@Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class TenantResource {
 
