@@ -43,7 +43,7 @@ public class VersionAuthzService {
         return authzService.createResource(name,
                 getResourceType(),
                 "Version %d".formatted(versionId),
-                Set.of("/version/%d/*".formatted(versionId)),
+                Set.of("/{v}/version/%d/*".formatted(versionId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString()),

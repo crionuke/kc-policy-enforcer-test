@@ -41,7 +41,7 @@ public class ProjectAuthzService {
         return authzService.createResource(name,
                 getResourceType(),
                 "Project %d".formatted(projectId),
-                Set.of("/project/%d/*".formatted(projectId)),
+                Set.of("/{v}/project/%d/*".formatted(projectId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));

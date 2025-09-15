@@ -61,6 +61,14 @@
       "containerId" : "0180ab3a-d1a5-4e4a-8dfe-fbaabe8523af",
       "attributes" : { }
     }, {
+      "id" : "773d611c-48c9-4967-b0cf-a4b5d515f6b8",
+      "name" : "ADMIN",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "0180ab3a-d1a5-4e4a-8dfe-fbaabe8523af",
+      "attributes" : { }
+    }, {
       "id" : "07cce55c-21ba-4ede-bfcd-a55a591c5990",
       "name" : "offline_access",
       "description" : "${role_offline-access}",
@@ -69,17 +77,17 @@
       "containerId" : "0180ab3a-d1a5-4e4a-8dfe-fbaabe8523af",
       "attributes" : { }
     }, {
-      "id" : "1f21b1f6-d281-40bc-8a29-3fe7fc59b8cb",
-      "name" : "admin",
-      "description" : "",
+      "id" : "8e980f33-e619-4e9e-9f39-411426155a3d",
+      "name" : "uma_authorization",
+      "description" : "${role_uma_authorization}",
       "composite" : false,
       "clientRole" : false,
       "containerId" : "0180ab3a-d1a5-4e4a-8dfe-fbaabe8523af",
       "attributes" : { }
     }, {
-      "id" : "8e980f33-e619-4e9e-9f39-411426155a3d",
-      "name" : "uma_authorization",
-      "description" : "${role_uma_authorization}",
+      "id" : "4885bd8a-d82e-4b79-8f02-8449920f4adb",
+      "name" : "DEVELOPER",
+      "description" : "",
       "composite" : false,
       "clientRole" : false,
       "containerId" : "0180ab3a-d1a5-4e4a-8dfe-fbaabe8523af",
@@ -351,15 +359,7 @@
       } ]
     }
   },
-  "groups" : [ {
-    "id" : "b17f6e97-3777-420c-8a59-62fbde3990f8",
-    "name" : "admins",
-    "path" : "/admins",
-    "subGroups" : [ ],
-    "attributes" : { },
-    "realmRoles" : [ "admin" ],
-    "clientRoles" : { }
-  } ],
+  "groups" : [ ],
   "defaultRole" : {
     "id" : "86ab7f15-a551-4666-a107-12101a12ff6a",
     "name" : "default-roles-omgservers",
@@ -403,7 +403,10 @@
   "users" : [ {
     "id" : "2d5b9dab-7e6d-4809-aede-eae425faf8a1",
     "username" : "admin",
-    "emailVerified" : false,
+    "firstName" : "ADMIN",
+    "lastName" : "OMGSERVERS",
+    "email" : "admin@omgservers.com",
+    "emailVerified" : true,
     "enabled" : true,
     "createdTimestamp" : 1757658754628,
     "totp" : false,
@@ -417,9 +420,78 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-omgservers" ],
+    "realmRoles" : [ "default-roles-omgservers", "ADMIN" ],
     "notBefore" : 0,
-    "groups" : [ "/admins" ]
+    "groups" : [ ]
+  }, {
+    "id" : "9c4df6c8-e7be-4e16-b362-3c4f122953bd",
+    "username" : "developer1",
+    "firstName" : "DEVELOPER1",
+    "lastName" : "OMGSERVERS",
+    "email" : "developer1@omgservers.com",
+    "emailVerified" : true,
+    "enabled" : true,
+    "createdTimestamp" : 1757926100839,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "d4a1ed69-ab5c-463f-a9e8-f9421506c220",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1757926109472,
+      "secretData" : "{\"value\":\"XhR4fi5Mp2CjEMGLCcVFdmf+w7b9h3KTXUfrcvMPtJw=\",\"salt\":\"oOyrO0sPEhQ+in0ueVG+OA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-omgservers", "DEVELOPER" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "35d13edd-7d91-4728-b5db-da01e2019413",
+    "username" : "developer2",
+    "firstName" : "DEVELOPER2",
+    "lastName" : "OMGSERVERS",
+    "email" : "developer2@omgservers.com",
+    "emailVerified" : true,
+    "enabled" : true,
+    "createdTimestamp" : 1757926124037,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "0370a6ad-119a-4765-81c0-61168225d84f",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1757926130904,
+      "secretData" : "{\"value\":\"kNCztPlV1jC/Lr2bNL4emp54vG4BLUhu3qPsRLy4Q6M=\",\"salt\":\"DU8J1wG2yEXhwflno0RBQw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-omgservers", "DEVELOPER" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "441b412b-7e05-4e44-bc0b-b39fec6dd78b",
+    "username" : "developer3",
+    "firstName" : "DEVELOPER3",
+    "lastName" : "OMGSERVERS",
+    "email" : "developer3@omgservers.com",
+    "emailVerified" : true,
+    "enabled" : true,
+    "createdTimestamp" : 1757926138352,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "cb1cc948-4133-48f0-b5c5-8c460af78132",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1757926151568,
+      "secretData" : "{\"value\":\"IES3UHGuyqP8Lasws43pvyKcT51OvuabDodJcAKNZRo=\",\"salt\":\"13f2cFylC6aC7RgF8EWbYQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-omgservers", "DEVELOPER" ],
+    "notBefore" : 0,
+    "groups" : [ ]
   }, {
     "id" : "24cf34f4-c617-45be-afd5-183c594eb784",
     "username" : "service-account-omgservice",
@@ -433,6 +505,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-omgservers" ],
     "clientRoles" : {
+      "realm-management" : [ "realm-admin" ],
       "omgservice" : [ "uma_protection" ]
     },
     "notBefore" : 0,
@@ -623,36 +696,64 @@
       "allowRemoteResourceManagement" : true,
       "policyEnforcementMode" : "ENFORCING",
       "resources" : [ {
-        "name" : "all-resources",
+        "name" : "resource:omg:*:*",
+        "type" : "type:omg:*",
         "ownerManagedAccess" : false,
-        "displayName" : "All resources",
+        "displayName" : "Any resources",
         "attributes" : { },
         "uris" : [ "/*" ],
         "icon_uri" : ""
+      }, {
+        "name" : "resource:omg:global:*",
+        "type" : "type:omg:global",
+        "ownerManagedAccess" : false,
+        "displayName" : "Global resource",
+        "attributes" : { },
+        "uris" : [ "/{v}/tenant" ],
+        "icon_uri" : ""
       } ],
       "policies" : [ {
-        "name" : "admins-group-member",
+        "name" : "policy:omg:*:*:developers",
         "description" : "",
-        "type" : "group",
+        "type" : "role",
         "logic" : "POSITIVE",
         "decisionStrategy" : "UNANIMOUS",
         "config" : {
-          "groups" : "[{\"path\":\"/admins\",\"extendChildren\":false}]",
-          "groupsClaim" : ""
+          "fetchRoles" : "false",
+          "roles" : "[{\"id\":\"DEVELOPER\",\"required\":true}]"
         }
       }, {
-        "name" : "all-resources",
+        "name" : "policy:omg:*:*:admins",
+        "type" : "role",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "UNANIMOUS",
+        "config" : {
+          "roles" : "[{\"id\":\"ADMIN\",\"required\":true}]"
+        }
+      }, {
+        "name" : "permission:omg:*:*:*",
         "description" : "",
         "type" : "resource",
         "logic" : "POSITIVE",
-        "decisionStrategy" : "UNANIMOUS",
+        "decisionStrategy" : "AFFIRMATIVE",
         "config" : {
-          "resources" : "[\"all-resources\"]",
-          "applyPolicies" : "[\"admins-group-member\"]"
+          "resources" : "[\"resource:omg:*:*\"]",
+          "applyPolicies" : "[\"policy:omg:*:*:admins\"]"
+        }
+      }, {
+        "name" : "permission:omg:global:*:*",
+        "description" : "",
+        "type" : "resource",
+        "logic" : "POSITIVE",
+        "decisionStrategy" : "AFFIRMATIVE",
+        "config" : {
+          "defaultResourceType" : "",
+          "resources" : "[\"resource:omg:global:*\"]",
+          "applyPolicies" : "[\"policy:omg:*:*:admins\",\"policy:omg:*:*:developers\"]"
         }
       } ],
       "scopes" : [ ],
-      "decisionStrategy" : "UNANIMOUS"
+      "decisionStrategy" : "AFFIRMATIVE"
     }
   }, {
     "id" : "34900460-fb47-4501-832a-41e8d16f9af8",
@@ -1385,7 +1486,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper" ]
       }
     }, {
       "id" : "50a60a96-db3a-40de-b777-3b7a45dc7f3d",
@@ -1394,7 +1495,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-usermodel-attribute-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-usermodel-property-mapper", "oidc-full-name-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-attribute-mapper", "oidc-address-mapper" ]
       }
     }, {
       "id" : "f8b91cc9-39b5-4276-8543-4f233968700a",

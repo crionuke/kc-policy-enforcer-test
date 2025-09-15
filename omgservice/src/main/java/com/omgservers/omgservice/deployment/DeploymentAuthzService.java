@@ -43,7 +43,7 @@ public class DeploymentAuthzService {
         return authzService.createResource(name,
                 getResourceType(),
                 "Deployment %d".formatted(deploymentId),
-                Set.of("/deployment/%d/*".formatted(deploymentId)),
+                Set.of("/{v}/deployment/%d/*".formatted(deploymentId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString()),

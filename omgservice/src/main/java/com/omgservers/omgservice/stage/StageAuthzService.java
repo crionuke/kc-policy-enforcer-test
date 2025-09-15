@@ -41,7 +41,7 @@ public class StageAuthzService {
         return authzService.createResource(name,
                 getResourceType(),
                 "Stage %d".formatted(stageId),
-                Set.of("/stage/%d/*".formatted(stageId)),
+                Set.of("/{v}/stage/%d/*".formatted(stageId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));

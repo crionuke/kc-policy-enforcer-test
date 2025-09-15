@@ -40,7 +40,7 @@ public class TenantAuthzService {
         return authzService.createResource(name,
                 getResourceType(),
                 "Tenant %d".formatted(tenantId),
-                Set.of("/tenant/%d/*".formatted(tenantId)),
+                Set.of("/{v}/tenant/%d/*".formatted(tenantId)),
                 scopeNames,
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }
