@@ -1,9 +1,9 @@
 package com.omgservers.omgservice.tenant;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class TenantConfig {
 
-    @NotNull
     public TenantConfigVersion version;
+    public UUID createdBy;
 }

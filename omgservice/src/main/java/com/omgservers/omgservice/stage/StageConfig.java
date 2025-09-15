@@ -1,9 +1,9 @@
 package com.omgservers.omgservice.stage;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class StageConfig {
 
-    @NotNull
     public StageConfigVersion version;
+    public UUID createdBy;
 }

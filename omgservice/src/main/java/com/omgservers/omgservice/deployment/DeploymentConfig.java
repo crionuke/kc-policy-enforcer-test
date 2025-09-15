@@ -1,9 +1,9 @@
 package com.omgservers.omgservice.deployment;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class DeploymentConfig {
 
-    @NotNull
     public DeploymentConfigVersion version;
+    public UUID createdBy;
 }

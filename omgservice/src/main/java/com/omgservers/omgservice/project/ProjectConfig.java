@@ -1,9 +1,9 @@
 package com.omgservers.omgservice.project;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class ProjectConfig {
 
-    @NotNull
     public ProjectConfigVersion version;
+    public UUID createdBy;
 }
