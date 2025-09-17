@@ -13,4 +13,4 @@ fi
 
 echo "$(date) Executing $0 $@" >> .log
 
-./post_token.sh $USERNAME $PASSWORD | jq -r .access_token
+./get_token.sh $USERNAME $PASSWORD | jq -r .access_token

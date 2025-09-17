@@ -1,8 +1,11 @@
 package com.omgservers.omgservice.tenant;
 
+import com.omgservers.omgservice.authz.AuthzEntity;
+import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +15,16 @@ import java.util.Set;
 public class TenantCreatedHandler implements EventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TenantCreatedHandler.class);
 
-    final TenantAuthzService tenantAuthzService;
-    final TenantService tenantService;
+    final TenantCreatedHandler thisHandler;
+    final TenantAuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public TenantCreatedHandler(final TenantAuthzService tenantAuthzService,
-                                final TenantService tenantService) {
-        this.tenantAuthzService = tenantAuthzService;
-        this.tenantService = tenantService;
+    public TenantCreatedHandler(final TenantCreatedHandler thisHandler,
+                                final TenantAuthzService authzService,
+                                final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
+        this.authzService = authzService;
+        this.thisHandler = thisHandler;
     }
 
     @Override
@@ -30,25 +36,57 @@ public class TenantCreatedHandler implements EventHandler {
     public void handle(final Long resourceId) {
         LOGGER.info("Creating tenant {}", resourceId);
 
-        final var viewersGroup = tenantAuthzService.createViewersGroup(resourceId);
-        final var managersGroup = tenantAuthzService.createManagersGroup(resourceId);
-        final var adminsGroup = tenantAuthzService.createAdminsGroup(resourceId);
+        final var tenant = Tenant.findByIdRequired(resourceId);
+        final var createdBy = tenant.createdBy;
 
-        final var tenantResource = tenantAuthzService.createResource(resourceId);
+        final var authz = TenantConfig.Authz.create();
 
-        final var viewersPolicy = tenantAuthzService.createViewersPolicy(resourceId, viewersGroup);
-        final var managersPolicy = tenantAuthzService.createManagersPolicy(resourceId, managersGroup);
-        final var adminsPolicy = tenantAuthzService.createAdminsPolicy(resourceId, adminsGroup);
+        final var viewersGroup = authzService.createViewersGroup(resourceId);
+        authz.groups.viewers = new AuthzEntity(viewersGroup.getId(), viewersGroup.getName());
+
+        final var managersGroup = authzService.createManagersGroup(resourceId);
+        authz.groups.managers = new AuthzEntity(managersGroup.getId(), managersGroup.getName());
+
+        final var adminsGroup = authzService.createAdminsGroup(resourceId);
+        authz.groups.admins = new AuthzEntity(adminsGroup.getId(), adminsGroup.getName());
+
+        keycloakService.joinGroup(createdBy, adminsGroup);
+
+        final var tenantResource = authzService.createResource(resourceId);
+        authz.resource = new AuthzEntity(tenantResource.getId(), tenantResource.getName());
+
+        final var viewersPolicy = authzService.createViewersPolicy(resourceId, viewersGroup);
+        authz.policies.viewersGroupMembers = new AuthzEntity(viewersPolicy.getId(), viewersPolicy.getName());
+
+        final var managersPolicy = authzService.createManagersPolicy(resourceId, managersGroup);
+        authz.policies.managersGroupMembers = new AuthzEntity(managersPolicy.getId(), managersPolicy.getName());
+
+        final var adminsPolicy = authzService.createAdminsPolicy(resourceId, adminsGroup);
+        authz.policies.adminsGroupMembers = new AuthzEntity(adminsPolicy.getId(), adminsPolicy.getName());
 
         final var viewPermissionPolicies = Set.of(viewersPolicy, managersPolicy, adminsPolicy);
-        tenantAuthzService.createViewPermission(resourceId, tenantResource, viewPermissionPolicies);
+        final var viewPermission = authzService
+                .createViewPermission(resourceId, tenantResource, viewPermissionPolicies);
+        authz.permissions.view = new AuthzEntity(viewPermission.getId(), viewPermission.getName());
 
         final var managePermissionPolicies = Set.of(managersPolicy, adminsPolicy);
-        tenantAuthzService.createManagePermission(resourceId, tenantResource, managePermissionPolicies);
+        final var managePermission = authzService
+                .createManagePermission(resourceId, tenantResource, managePermissionPolicies);
+        authz.permissions.manage = new AuthzEntity(managePermission.getId(), managePermission.getName());
 
         final var adminPermissionPolicies = Set.of(adminsPolicy);
-        tenantAuthzService.createAdminPermission(resourceId, tenantResource, adminPermissionPolicies);
+        final var adminPermission = authzService
+                .createAdminPermission(resourceId, tenantResource, adminPermissionPolicies);
+        authz.permissions.admin = new AuthzEntity(adminPermission.getId(), adminPermission.getName());
 
-        tenantService.switchStateFromCreatingToCreated(resourceId);
+        thisHandler.finish(resourceId, authz);
+
+        LOGGER.info("Tenant {} created successfully", resourceId);
+    }
+
+    @Transactional
+    public void finish(final Long resourceId, final TenantConfig.Authz authz) {
+        final var tenant = Tenant.findByIdLocked(resourceId);
+        tenant.finishCreation(authz);
     }
 }

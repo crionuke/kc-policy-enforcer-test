@@ -16,8 +16,6 @@ import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
-import java.util.UUID;
-
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class TenantResource {
@@ -39,16 +37,16 @@ public class TenantResource {
 
     @POST
     @Transactional
-    @Path("/tenant")
+    @Path("/my/tenants")
     @ResponseStatus(201)
     @Consumes(MediaType.APPLICATION_JSON)
     public Tenant create(@NotNull @Valid final NewTenant newTenant) {
         final var tenant = new Tenant();
+        tenant.createdBy = subClaim.get();
         tenant.name = newTenant.name;
         tenant.status = TenantStatus.CREATING;
         tenant.config = new TenantConfig();
         tenant.config.version = TenantConfigVersion.V1;
-        tenant.config.createdBy = UUID.fromString(subClaim.get());
         tenant.persist();
 
         eventService.create(EventQualifier.TENANT_CREATED, tenant.id);

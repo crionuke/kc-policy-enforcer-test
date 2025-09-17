@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.project;
 
-import com.omgservers.omgservice.base.BaseEntity;
+import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.ProjectNotFound;
 import com.omgservers.omgservice.errors.ProjectStatusMismatch;
 import com.omgservers.omgservice.errors.ProjectTenantMismatch;
@@ -17,7 +17,7 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "omgservice_project")
-public class Project extends BaseEntity {
+public class Project extends Resource {
 
     public static Project findByIdRequired(final Long projectId) {
         return Project.<Project>findByIdOptional(projectId)

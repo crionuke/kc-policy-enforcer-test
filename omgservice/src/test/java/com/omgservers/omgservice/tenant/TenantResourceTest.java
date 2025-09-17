@@ -1,125 +1,69 @@
 package com.omgservers.omgservice.tenant;
 
 import com.omgservers.omgservice.OidcClients;
-import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
+import com.omgservers.omgservice.event.EventResourceClient;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import java.util.UUID;
 
 @QuarkusTest
 @ApplicationScoped
-@TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(TenantResource.class)
-public class TenantResourceTest {
+public class TenantResourceTest extends Assertions {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantResourceTest.class);
+    @Inject
+    TenantResourceClient tenantResourceClient;
+
+    @Inject
+    TestTenantService testTenantService;
+
+    @Inject
+    EventResourceClient eventResourceClient;
+
     @Inject
     OidcClients oidcClients;
 
-    @Transactional
-    public Tenant persistTestTenant(final TenantStatus status) {
-        final var testTenant = createTestTenant(status);
-        testTenant.persist();
-        return testTenant;
-    }
-
-    @Transactional
-    public Tenant persistTestTenant() {
-        return persistTestTenant(TenantStatus.CREATED);
-    }
-
     @Test
     void testGetTenantByIdSuccess() {
-        final var testTenant = persistTestTenant();
+        final var token = oidcClients.getAdminAccessToken();
 
-        given()
-                .pathParam("id", testTenant.id)
-                .when()
-                .get("/tenant/{id}")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(testTenant.id.intValue()))
-                .body("name", equalTo(testTenant.name))
-                .body("status", equalTo(testTenant.status.toString()))
-                .body("config", notNullValue());
-    }
+        final var createdTenant = testTenantService.createTenant(true, token);
 
-    @Test
-    void testGetTenantByIdNotFound() {
-        final var nonExistentId = new Random().nextLong();
-
-        given()
-                .pathParam("id", nonExistentId)
-                .when()
-                .get("/tenant/{id}")
-                .then()
-                .statusCode(404)
-                .body("code", equalTo("TenantNotFound"));
+        final var tenantById = tenantResourceClient.getByIdCheck200(createdTenant.id, token);
+        assertEquals(createdTenant.id, tenantById.id);
+        assertEquals(createdTenant.name, tenantById.name);
+        assertEquals(TenantStatus.CREATED, tenantById.status);
     }
 
     @Test
     void testCreateTenantSuccess() {
+        final var token = oidcClients.getAdminAccessToken();
+
         final var newTenant = new NewTenant();
-        newTenant.name = "New tenant";
+        newTenant.name = "tenant-" + UUID.randomUUID();
 
-        final var tenant = given()
-                .auth().oauth2(oidcClients.getAdminAccessToken())
-                .contentType(ContentType.JSON)
-                .body(newTenant)
-                .when()
-                .post("/tenant")
-                .then()
-                .log().body()
-                .statusCode(201)
-                .contentType(ContentType.JSON)
-                .body("id", notNullValue())
-                .body("name", equalTo(newTenant.name))
-                .body("status", equalTo(TenantStatus.CREATING.toString()))
-                .body("config", notNullValue())
-                .extract().as(Tenant.class);
+        final var createdTenant = testTenantService.createTenant(newTenant, false, token);
 
-        Event.findFirstRequired(EventQualifier.TENANT_CREATED, tenant.id);
+        assertNotNull(createdTenant.id);
+        assertEquals(newTenant.name, createdTenant.name);
+        assertEquals(TenantStatus.CREATING, createdTenant.status);
+
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.TENANT_CREATED,
+                createdTenant.id,
+                token);
     }
 
     @Test
     void testCreateTenantValidationFailed() {
-        final var invalidTenant = new NewTenant();
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(invalidTenant)
-                .when()
-                .post("/tenant")
-                .then()
-                .log().body()
-                .statusCode(400)
-                .body("code", equalTo("ValidationFailed"));
-    }
-
-    private Tenant createTestTenant(final TenantStatus status) {
-        final var tenant = new Tenant();
-        tenant.name = "Test tenant";
-        tenant.status = status;
-        tenant.config = new TenantConfig();
-        tenant.config.version = TenantConfigVersion.V1;
-        tenant.persist();
-
-        return tenant;
+        final var token = oidcClients.getAdminAccessToken();
+        final var newTenant = new NewTenant();
+        final var errorResponse = tenantResourceClient.createCheck4xx(newTenant, 400, token);
+        assertEquals("ValidationFailed", errorResponse.code);
     }
 }

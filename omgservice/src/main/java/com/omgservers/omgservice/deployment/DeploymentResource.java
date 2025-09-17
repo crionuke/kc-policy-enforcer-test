@@ -19,8 +19,6 @@ import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class DeploymentResource {
@@ -66,12 +64,12 @@ public class DeploymentResource {
         version.ensureCreatedStatus();
 
         final var deployment = new Deployment();
+        deployment.createdBy = subClaim.get();
         deployment.stage = stage;
         deployment.version = version;
         deployment.status = DeploymentStatus.CREATING;
         deployment.config = new DeploymentConfig();
         deployment.config.version = DeploymentConfigVersion.V1;
-        deployment.config.createdBy = UUID.fromString(subClaim.get());
         deployment.persist();
 
         eventService.create(EventQualifier.DEPLOYMENT_CREATED, deployment.id);

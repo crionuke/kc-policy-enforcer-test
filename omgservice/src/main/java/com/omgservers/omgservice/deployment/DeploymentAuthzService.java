@@ -1,6 +1,7 @@
 package com.omgservers.omgservice.deployment;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.AuthzScope;
+import com.omgservers.omgservice.authz.KeycloakService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
@@ -17,10 +18,10 @@ public class DeploymentAuthzService {
     static private final String STAGE_ID_ATTRIBUTE = "stage_id";
     static private final String DEPLOYMENT_ID_ATTRIBUTE = "deployment_id";
 
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public DeploymentAuthzService(final AuthzService authzService) {
-        this.authzService = authzService;
+    public DeploymentAuthzService(final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
     }
 
     public String getResourceName(final Long deploymentId) {
@@ -36,15 +37,11 @@ public class DeploymentAuthzService {
                                                  final Long deploymentId) {
         final var name = getResourceName(deploymentId);
 
-        final var scopeNames = Set.of(DeploymentScope.VIEW.getName(),
-                DeploymentScope.MANAGE.getName(),
-                DeploymentScope.ADMIN.getName());
-
-        return authzService.createResource(name,
+        return keycloakService.createResource(name,
                 getResourceType(),
                 "Deployment %d".formatted(deploymentId),
-                Set.of("/{v}/deployment/%d/*".formatted(deploymentId)),
-                scopeNames,
+                Set.of("/{ver}/deployment/%d/*".formatted(deploymentId)),
+                AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString()),
                         DEPLOYMENT_ID_ATTRIBUTE, List.of(deploymentId.toString())));
@@ -58,7 +55,7 @@ public class DeploymentAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(deploymentId);
-        return authzService.createPermission(name, resource, DeploymentScope.VIEW.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
     }
 
     public String getManagePermissionName(final Long deploymentId) {
@@ -69,7 +66,7 @@ public class DeploymentAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(deploymentId);
-        return authzService.createPermission(name, resource, DeploymentScope.MANAGE.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
     }
 
     public String getAdminPermissionName(final Long deploymentId) {
@@ -80,6 +77,6 @@ public class DeploymentAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(deploymentId);
-        return authzService.createPermission(name, resource, DeploymentScope.ADMIN.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
     }
 }

@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.version;
 
-import com.omgservers.omgservice.base.BaseEntity;
+import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.VersionNotFound;
 import com.omgservers.omgservice.errors.VersionProjectMismatch;
 import com.omgservers.omgservice.errors.VersionStatusMismatch;
@@ -18,7 +18,7 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "omgservice_version")
-public class Version extends BaseEntity {
+public class Version extends Resource {
 
     public static Version findByIdRequired(final Long versionId) {
         return Version.<Version>findByIdOptional(versionId)

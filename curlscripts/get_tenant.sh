@@ -12,9 +12,7 @@ fi
 
 echo "$(date) Executing $0 $@" >> .log
 
-API_TOKEN=$(./echo_access_token.sh $API_USERNAME $API_PASSWORD)
-
 echo "$(date) GET ${API_HOSTNAME}/v1/tenant/${TENANT_ID}" >> .log
 curl -s -S --fail-with-body -X GET "${API_HOSTNAME}/v1/tenant/${TENANT_ID}" \
-  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Authorization: Bearer $(./echo_token.sh $API_USERNAME $API_PASSWORD)" \
   -H "Content-type: application/json" | jq .

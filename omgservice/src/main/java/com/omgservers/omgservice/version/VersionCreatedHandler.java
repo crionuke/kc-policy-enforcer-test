@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.version;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.project.ProjectAuthzService;
@@ -19,18 +19,18 @@ public class VersionCreatedHandler implements EventHandler {
     final VersionAuthzService versionAuthzService;
     final TenantAuthzService tenantAuthzService;
     final VersionService versionService;
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
     public VersionCreatedHandler(final ProjectAuthzService projectAuthzService,
                                  final VersionAuthzService versionAuthzService,
                                  final TenantAuthzService tenantAuthzService,
                                  final VersionService versionService,
-                                 final AuthzService authzService) {
+                                 final KeycloakService keycloakService) {
         this.projectAuthzService = projectAuthzService;
         this.versionAuthzService = versionAuthzService;
         this.tenantAuthzService = tenantAuthzService;
         this.versionService = versionService;
-        this.authzService = authzService;
+        this.keycloakService = keycloakService;
     }
 
     @Override
@@ -52,17 +52,17 @@ public class VersionCreatedHandler implements EventHandler {
         final var tenantManagersPolicyName = tenantAuthzService.getManagersPolicyName(tenantId);
         final var tenantAdminsPolicyName = tenantAuthzService.getAdminsPolicyName(tenantId);
 
-        final var tenantViewersPolicy = authzService.findPolicyByNameRequired(tenantViewersPolicyName);
-        final var tenantManagersPolicy = authzService.findPolicyByNameRequired(tenantManagersPolicyName);
-        final var tenantAdminsPolicy = authzService.findPolicyByNameRequired(tenantAdminsPolicyName);
+        final var tenantViewersPolicy = keycloakService.findPolicyByNameRequired(tenantViewersPolicyName);
+        final var tenantManagersPolicy = keycloakService.findPolicyByNameRequired(tenantManagersPolicyName);
+        final var tenantAdminsPolicy = keycloakService.findPolicyByNameRequired(tenantAdminsPolicyName);
 
         final var projectViewersPolicyName = projectAuthzService.getViewersPolicyName(projectId);
         final var projectManagersPolicyName = projectAuthzService.getManagersPolicyName(projectId);
         final var projectAdminsPolicyName = projectAuthzService.getAdminsPolicyName(projectId);
 
-        final var projectViewersPolicy = authzService.findPolicyByNameRequired(projectViewersPolicyName);
-        final var projectManagersPolicy = authzService.findPolicyByNameRequired(projectManagersPolicyName);
-        final var projectAdminsPolicy = authzService.findPolicyByNameRequired(projectAdminsPolicyName);
+        final var projectViewersPolicy = keycloakService.findPolicyByNameRequired(projectViewersPolicyName);
+        final var projectManagersPolicy = keycloakService.findPolicyByNameRequired(projectManagersPolicyName);
+        final var projectAdminsPolicy = keycloakService.findPolicyByNameRequired(projectAdminsPolicyName);
 
         final var viewPermissionPolicies = Set.of(projectViewersPolicy,
                 projectManagersPolicy,

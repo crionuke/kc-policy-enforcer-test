@@ -1,6 +1,7 @@
 package com.omgservers.omgservice.project;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.AuthzScope;
+import com.omgservers.omgservice.authz.KeycloakService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
@@ -17,10 +18,10 @@ public class ProjectAuthzService {
     static private final String TENANT_ID_ATTRIBUTE = "tenant_id";
     static private final String PROJECT_ID_ATTRIBUTE = "project_id";
 
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public ProjectAuthzService(final AuthzService authzService) {
-        this.authzService = authzService;
+    public ProjectAuthzService(final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
     }
 
     public String getResourceName(final Long projectId) {
@@ -34,15 +35,11 @@ public class ProjectAuthzService {
     public ResourceRepresentation createResource(final Long tenantId, final Long projectId) {
         final var name = getResourceName(projectId);
 
-        final var scopeNames = Set.of(ProjectScope.VIEW.getName(),
-                ProjectScope.MANAGE.getName(),
-                ProjectScope.ADMIN.getName());
-
-        return authzService.createResource(name,
+        return keycloakService.createResource(name,
                 getResourceType(),
                 "Project %d".formatted(projectId),
-                Set.of("/{v}/project/%d/*".formatted(projectId)),
-                scopeNames,
+                Set.of("/{ver}/project/%d/*".formatted(projectId)),
+                AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
     }
@@ -53,7 +50,7 @@ public class ProjectAuthzService {
 
     public GroupRepresentation createViewersGroup(final Long projectId) {
         final var name = getViewersGroupName(projectId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getManagersGroupName(final Long projectId) {
@@ -62,7 +59,7 @@ public class ProjectAuthzService {
 
     public GroupRepresentation createManagersGroup(final Long projectId) {
         final var name = getManagersGroupName(projectId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getAdminsGroupName(final Long projectId) {
@@ -71,7 +68,7 @@ public class ProjectAuthzService {
 
     public GroupRepresentation createAdminsGroup(final Long projectId) {
         final var name = getAdminsGroupName(projectId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getViewersPolicyName(final Long projectId) {
@@ -81,7 +78,7 @@ public class ProjectAuthzService {
     public PolicyRepresentation createViewersPolicy(final Long projectId,
                                                     final GroupRepresentation viewersGroup) {
         final var name = getViewersPolicyName(projectId);
-        return authzService.createPolicy(name, Set.of(viewersGroup));
+        return keycloakService.createPolicy(name, Set.of(viewersGroup));
     }
 
     public String getManagersPolicyName(final Long projectId) {
@@ -91,7 +88,7 @@ public class ProjectAuthzService {
     public PolicyRepresentation createManagersPolicy(final Long projectId,
                                                      final GroupRepresentation managersGroup) {
         final var name = getManagersPolicyName(projectId);
-        return authzService.createPolicy(name, Set.of(managersGroup));
+        return keycloakService.createPolicy(name, Set.of(managersGroup));
     }
 
     public String getAdminsPolicyName(final Long projectId) {
@@ -101,7 +98,7 @@ public class ProjectAuthzService {
     public PolicyRepresentation createAdminsPolicy(final Long projectId,
                                                    final GroupRepresentation adminsGroup) {
         final var name = getAdminsPolicyName(projectId);
-        return authzService.createPolicy(name, Set.of(adminsGroup));
+        return keycloakService.createPolicy(name, Set.of(adminsGroup));
     }
 
     public String getViewPermissionName(final Long projectId) {
@@ -112,7 +109,7 @@ public class ProjectAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(projectId);
-        return authzService.createPermission(name, resource, ProjectScope.VIEW.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
     }
 
     public String getManagePermissionName(final Long projectId) {
@@ -123,7 +120,7 @@ public class ProjectAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(projectId);
-        return authzService.createPermission(name, resource, ProjectScope.MANAGE.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
     }
 
     public String getAdminPermissionName(final Long projectId) {
@@ -134,6 +131,6 @@ public class ProjectAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(projectId);
-        return authzService.createPermission(name, resource, ProjectScope.ADMIN.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
     }
 }

@@ -11,14 +11,12 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
-import org.jboss.resteasy.reactive.RestPath;
-
-import java.util.UUID;
 
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
@@ -44,18 +42,18 @@ public class ProjectResource {
     @ResponseStatus(201)
     @Path("/tenant/{tenantId}/project")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Project create(@RestPath @NotNull final Long tenantId,
+    public Project create(@PathParam("tenantId") @NotNull final Long tenantId,
                           @NotNull @Valid final NewProject newProject) {
         final var tenant = Tenant.findByIdRequired(tenantId);
         tenant.ensureCreatedStatus();
 
         final var project = new Project();
+        project.createdBy = subClaim.get();
         project.tenant = tenant;
         project.name = newProject.name;
         project.status = ProjectStatus.CREATING;
         project.config = new ProjectConfig();
         project.config.version = ProjectConfigVersion.V1;
-        project.config.createdBy = UUID.fromString(subClaim.get());
         project.persist();
 
         eventService.create(EventQualifier.PROJECT_CREATED, project.id);

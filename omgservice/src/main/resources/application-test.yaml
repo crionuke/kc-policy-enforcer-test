@@ -1,4 +1,12 @@
 quarkus:
+  log:
+    category:
+      "io.quarkus.oidc":
+        level: DEBUG
+      "io.quarkus.keycloak":
+        level: DEBUG
+      "org.keycloak":
+        level: DEBUG
   datasource:
     db-kind: postgresql
     username: omgservice

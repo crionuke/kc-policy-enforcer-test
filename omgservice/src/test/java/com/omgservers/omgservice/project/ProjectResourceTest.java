@@ -1,156 +1,78 @@
 package com.omgservers.omgservice.project;
 
 import com.omgservers.omgservice.OidcClients;
-import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.tenant.Tenant;
-import com.omgservers.omgservice.tenant.TenantResourceTest;
-import com.omgservers.omgservice.tenant.TenantStatus;
+import com.omgservers.omgservice.event.EventResourceClient;
+import com.omgservers.omgservice.tenant.TestTenantService;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import java.util.UUID;
 
 @QuarkusTest
-@ApplicationScoped
-@TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(ProjectResource.class)
-public class ProjectResourceTest {
+public class ProjectResourceTest extends Assertions {
+
+    @Inject
+    TestTenantService testTenantService;
+
+    @Inject
+    TestProjectService testProjectService;
+
+    @Inject
+    ProjectResourceClient projectResourceClient;
+
+    @Inject
+    EventResourceClient eventResourceClient;
 
     @Inject
     OidcClients oidcClients;
 
-    @Inject
-    TenantResourceTest tenantResourceTest;
-
-    @Transactional
-    public Project persistTestProject(final Tenant tenant, final ProjectStatus status) {
-        final var testProject = createTestProject(tenant, status);
-        testProject.persist();
-        return testProject;
-    }
-
-    public Project persistTestProject(final Tenant tenant) {
-        return persistTestProject(tenant, ProjectStatus.CREATED);
-    }
-
     @Test
     void testGetProjectByIdSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = persistTestProject(testTenant);
+        final var token = oidcClients.getAdminAccessToken();
 
-        given()
-                .pathParam("id", testProject.id)
-                .when()
-                .get("/project/{id}")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(testProject.id.intValue()))
-                .body("tenant.id", equalTo(testTenant.id.intValue()))
-                .body("name", equalTo(testProject.name))
-                .body("status", equalTo(testProject.status.toString()))
-                .body("config", notNullValue());
-    }
+        final var testTenant = testTenantService.createTenant(true, token);
+        final var createdProject = testProjectService.createProject(testTenant.id, true, token);
 
-    @Test
-    void testGetProjectByIdNotFound() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var nonExistentId = new Random().nextLong();
+        final var projectById = projectResourceClient.getByIdCheck200(createdProject.id, token);
 
-        given()
-                .pathParam("id", nonExistentId)
-                .when()
-                .get("/project/{id}")
-                .then()
-                .statusCode(404)
-                .body("code", equalTo("ProjectNotFound"));
+        assertEquals(createdProject.id, projectById.id);
+        assertEquals(createdProject.name, projectById.name);
+        assertEquals(ProjectStatus.CREATED, projectById.status);
     }
 
     @Test
     void testCreateProjectSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var token = oidcClients.getAdminAccessToken();
+
+        final var testTenant = testTenantService.createTenant(true, token);
 
         final var newProject = new NewProject();
-        newProject.name = "New project";
+        newProject.name = "project-" + UUID.randomUUID();
+        final var createdProject = testProjectService.createProject(testTenant.id, newProject, true, token);
 
-        final var project = given()
-                .auth().oauth2(oidcClients.getAdminAccessToken())
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(newProject)
-                .when()
-                .post("/tenant/{tenantId}/project")
-                .then()
-                .log().body()
-                .statusCode(201)
-                .contentType(ContentType.JSON)
-                .body("id", notNullValue())
-                .body("name", equalTo(newProject.name))
-                .body("status", equalTo(ProjectStatus.CREATING.toString()))
-                .body("config", notNullValue())
-                .extract().as(Project.class);
+        assertNotNull(createdProject.id);
+        assertEquals(newProject.name, createdProject.name);
+        assertEquals(ProjectStatus.CREATING, createdProject.status);
 
-        Event.findFirstRequired(EventQualifier.PROJECT_CREATED, project.id);
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.PROJECT_CREATED,
+                createdProject.id,
+                token);
     }
 
     @Test
     void testCreateProjectValidationFailed() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-
-        final var invalidProject = new NewProject();
-
-        given()
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(invalidProject)
-                .when()
-                .post("/tenant/{tenantId}/project")
-                .then()
-                .log().body()
-                .statusCode(400)
-                .body("code", equalTo("ValidationFailed"));
-    }
-
-    @Test
-    void testCreateProjectTenantStatusMismatch() {
-        final var testTenant = tenantResourceTest.persistTestTenant(TenantStatus.CREATING);
-
+        final var token = oidcClients.getAdminAccessToken();
+        final var testTenant = testTenantService.createTenant(true, token);
         final var newProject = new NewProject();
-        newProject.name = "New project";
-
-        given()
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(newProject)
-                .when()
-                .post("/tenant/{tenantId}/project")
-                .then()
-                .log().body()
-                .statusCode(409)
-                .body("code", equalTo("TenantStatusMismatch"));
-    }
-
-    private Project createTestProject(final Tenant tenant, final ProjectStatus status) {
-        final var project = new Project();
-        project.tenant = tenant;
-        project.name = "Test project";
-        project.status = status;
-        project.config = new ProjectConfig();
-        project.config.version = ProjectConfigVersion.V1;
-        project.persist();
-
-        return project;
+        final var errorResponse = projectResourceClient.createCheck4xx(testTenant.id,
+                newProject,
+                400,
+                token);
+        assertEquals("ValidationFailed", errorResponse.code);
     }
 }

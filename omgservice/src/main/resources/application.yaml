@@ -3,6 +3,8 @@ quarkus:
     name: ${APPLICATION_NAME:omgservice}
   config:
     locations: application-policy.yaml
+  log:
+    level: ${LOG_LEVEL:INFO}
   datasource:
     db-kind: postgresql
     username: ${DATABASE_USERNAME}
@@ -41,7 +43,8 @@ quarkus:
       grant-type: CLIENT_CREDENTIALS
     policy-enforcer:
       enable: true
-      lazy-load-paths: false
+      lazy-load-paths: true
+      http-method-as-scope: true
   oidc:
     auth-server-url: ${AUTH_SERVER_URL}/realms/${AUTH_REALM}
     client-id: ${AUTH_CLIENT_ID}

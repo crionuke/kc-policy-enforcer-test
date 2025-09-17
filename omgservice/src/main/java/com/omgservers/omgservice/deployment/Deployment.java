@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.deployment;
 
-import com.omgservers.omgservice.base.BaseEntity;
+import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.DeploymentNotFound;
 import com.omgservers.omgservice.errors.DeploymentStageMismatch;
 import com.omgservers.omgservice.errors.DeploymentTenantMismatch;
@@ -21,17 +21,17 @@ import java.util.List;
 
 @Entity
 @Table(name = "omgservice_deployment")
-public class Deployment extends BaseEntity {
+public class Deployment extends Resource {
 
     public static Deployment findByIdRequired(final Long deploymentId) {
         return Deployment.<Deployment>findByIdOptional(deploymentId)
                 .orElseThrow(() -> new DeploymentNotFound(deploymentId));
     }
 
-    public static List<DeploymentProjection> listByProjectId(final Long projectId) {
+    public static List<DeploymentProjectionResource> listByProjectId(final Long projectId) {
         return Deployment.
-                <Deployment>find("version.project.id = ?1 order by created asc", projectId)
-                .project(DeploymentProjection.class)
+                <Deployment>find("version.project.id = ?1 order by createdAt asc", projectId)
+                .project(DeploymentProjectionResource.class)
                 .list();
     }
 

@@ -18,8 +18,6 @@ import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class VersionResource {
@@ -50,6 +48,7 @@ public class VersionResource {
         project.ensureCreatedStatus();
 
         final var version = new Version();
+        version.createdBy = subClaim.get();
         version.project = project;
         version.major = newVersion.major;
         version.minor = newVersion.minor;
@@ -57,7 +56,6 @@ public class VersionResource {
         version.status = VersionStatus.CREATING;
         version.config = new VersionConfig();
         version.config.version = VersionConfigVersion.V1;
-        version.config.createdBy = UUID.fromString(subClaim.get());
         version.persist();
 
         eventService.create(EventQualifier.VERSION_CREATED, version.id);

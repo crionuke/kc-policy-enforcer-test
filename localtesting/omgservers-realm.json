@@ -696,20 +696,42 @@
       "allowRemoteResourceManagement" : true,
       "policyEnforcementMode" : "ENFORCING",
       "resources" : [ {
-        "name" : "resource:omg:*:*",
-        "type" : "type:omg:*",
+        "name" : "resource:omg:platform:events",
+        "type" : "type:omg:platform",
         "ownerManagedAccess" : false,
-        "displayName" : "Any resources",
+        "displayName" : "Platform events",
         "attributes" : { },
-        "uris" : [ "/*" ],
+        "uris" : [ "/{ver}/platform/events/*" ],
+        "scopes" : [ {
+          "name" : "PATCH"
+        }, {
+          "name" : "DELETE"
+        }, {
+          "name" : "GET"
+        }, {
+          "name" : "POST"
+        }, {
+          "name" : "PUT"
+        } ],
         "icon_uri" : ""
       }, {
-        "name" : "resource:omg:global:*",
-        "type" : "type:omg:global",
+        "name" : "resource:omg:my:tenants",
+        "type" : "type:omg:my",
         "ownerManagedAccess" : false,
-        "displayName" : "Global resource",
+        "displayName" : "My tenants",
         "attributes" : { },
-        "uris" : [ "/{v}/tenant" ],
+        "uris" : [ "/{ver}/my/tenants/*" ],
+        "scopes" : [ {
+          "name" : "PATCH"
+        }, {
+          "name" : "DELETE"
+        }, {
+          "name" : "GET"
+        }, {
+          "name" : "POST"
+        }, {
+          "name" : "PUT"
+        } ],
         "icon_uri" : ""
       } ],
       "policies" : [ {
@@ -731,28 +753,38 @@
           "roles" : "[{\"id\":\"ADMIN\",\"required\":true}]"
         }
       }, {
-        "name" : "permission:omg:*:*:*",
+        "name" : "permission:omg:platform:events:*",
         "description" : "",
         "type" : "resource",
         "logic" : "POSITIVE",
         "decisionStrategy" : "AFFIRMATIVE",
         "config" : {
-          "resources" : "[\"resource:omg:*:*\"]",
+          "resources" : "[\"resource:omg:platform:events\"]",
           "applyPolicies" : "[\"policy:omg:*:*:admins\"]"
         }
       }, {
-        "name" : "permission:omg:global:*:*",
+        "name" : "permission:omg:my:tenants:*",
         "description" : "",
         "type" : "resource",
         "logic" : "POSITIVE",
         "decisionStrategy" : "AFFIRMATIVE",
         "config" : {
           "defaultResourceType" : "",
-          "resources" : "[\"resource:omg:global:*\"]",
-          "applyPolicies" : "[\"policy:omg:*:*:admins\",\"policy:omg:*:*:developers\"]"
+          "resources" : "[\"resource:omg:my:tenants\"]",
+          "applyPolicies" : "[\"policy:omg:*:*:developers\",\"policy:omg:*:*:admins\"]"
         }
       } ],
-      "scopes" : [ ],
+      "scopes" : [ {
+        "name" : "POST"
+      }, {
+        "name" : "GET"
+      }, {
+        "name" : "PATCH"
+      }, {
+        "name" : "PUT"
+      }, {
+        "name" : "DELETE"
+      } ],
       "decisionStrategy" : "AFFIRMATIVE"
     }
   }, {
@@ -1486,7 +1518,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper" ]
       }
     }, {
       "id" : "50a60a96-db3a-40de-b777-3b7a45dc7f3d",
@@ -1495,7 +1527,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-usermodel-property-mapper", "oidc-full-name-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-attribute-mapper", "oidc-address-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-attribute-mapper", "saml-role-list-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper" ]
       }
     }, {
       "id" : "f8b91cc9-39b5-4276-8543-4f233968700a",

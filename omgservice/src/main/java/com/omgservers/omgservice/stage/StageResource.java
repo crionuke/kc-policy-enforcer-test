@@ -18,8 +18,6 @@ import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
 import org.jboss.resteasy.reactive.RestPath;
 
-import java.util.UUID;
-
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class StageResource {
@@ -50,12 +48,12 @@ public class StageResource {
         tenant.ensureCreatedStatus();
 
         final var stage = new Stage();
+        stage.createdBy = subClaim.get();
         stage.tenant = tenant;
         stage.name = newStage.name;
         stage.status = StageStatus.CREATING;
         stage.config = new StageConfig();
         stage.config.version = StageConfigVersion.V1;
-        stage.config.createdBy = UUID.fromString(subClaim.get());
         stage.persist();
 
         eventService.create(EventQualifier.STAGE_CREATED, stage.id);

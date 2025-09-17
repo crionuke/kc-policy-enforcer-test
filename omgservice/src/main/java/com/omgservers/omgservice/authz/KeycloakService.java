@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.AuthorizationResource;
 import org.keycloak.admin.client.resource.GroupsResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.authorization.DecisionStrategy;
 import org.keycloak.representations.idm.authorization.GroupPolicyRepresentation;
@@ -26,14 +27,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class AuthzService {
+public class KeycloakService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakService.class);
 
-    private static final Logger log = LoggerFactory.getLogger(AuthzService.class);
     final KeycloakAdminClientConfig config;
     final Keycloak keycloak;
 
-    public AuthzService(final KeycloakAdminClientConfig config,
-                        final Keycloak keycloak) {
+    public KeycloakService(final KeycloakAdminClientConfig config,
+                           final Keycloak keycloak) {
         this.config = config;
         this.keycloak = keycloak;
     }
@@ -43,7 +44,7 @@ public class AuthzService {
 
         final var groups = resource.groups(name, 0, 1);
         if (!groups.isEmpty()) {
-            log.warn("Group {} already exists", name);
+            LOGGER.warn("Group {} already exists", name);
             return groups.getFirst();
         }
 
@@ -53,7 +54,7 @@ public class AuthzService {
         try (final var response = resource.add(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdGroup = resource.groups(name, 0, 1).getFirst();
-                log.info("Created group {}", name);
+                LOGGER.info("Created group {}", name);
 
                 return createdGroup;
             } else {
@@ -62,17 +63,26 @@ public class AuthzService {
         }
     }
 
+    public void joinGroup(final String userId, final GroupRepresentation group) {
+        final var resource = getUsersResource();
+
+        final var userResource = resource.get(userId);
+        userResource.joinGroup(group.getId());
+
+        LOGGER.info("User {} joined group {}", userId, group.getName());
+    }
+
     public ResourceRepresentation createResource(final String name,
                                                  final String type,
                                                  final String displayName,
                                                  final Set<String> uris,
-                                                 final Set<String> scopeNames,
+                                                 final Set<String> scopes,
                                                  final Map<String, List<String>> attributes) {
         final var resource = getAuthorizationResource().resources();
 
         final var resources = resource.findByName(name);
         if (!resources.isEmpty()) {
-            log.warn("Resource {} already exists", name);
+            LOGGER.warn("Resource {} already exists", name);
             return resources.getFirst();
         }
 
@@ -81,7 +91,7 @@ public class AuthzService {
         representation.setType(type);
         representation.setDisplayName(displayName);
         representation.setUris(uris);
-        final var scopeRepresentations = scopeNames.stream()
+        final var scopeRepresentations = scopes.stream()
                 .map(ScopeRepresentation::new)
                 .collect(Collectors.toSet());
         representation.setScopes(scopeRepresentations);
@@ -90,7 +100,7 @@ public class AuthzService {
         try (final var response = resource.create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = resource.findByName(name).getFirst();
-                log.info("Created resource {}", name);
+                LOGGER.info("Created resource {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create resource " + name);
@@ -114,7 +124,7 @@ public class AuthzService {
 
         final var policy = policiesResource.findByName(name);
         if (Objects.nonNull(policy)) {
-            log.warn("Policy {} already exists", name);
+            LOGGER.warn("Policy {} already exists", name);
             return policy;
         }
 
@@ -129,7 +139,7 @@ public class AuthzService {
         try (final var response = policiesResource.group().create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = policiesResource.findByName(name);
-                log.info("Created policy {}", name);
+                LOGGER.info("Created policy {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create policy " + name);
@@ -139,20 +149,20 @@ public class AuthzService {
 
     public ScopePermissionRepresentation createPermission(final String name,
                                                           final ResourceRepresentation resource,
-                                                          final String scope,
+                                                          final Set<String> scopes,
                                                           final Set<PolicyRepresentation> policies) {
         final var permissionsResource = getAuthorizationResource().permissions().scope();
 
         final var permission = permissionsResource.findByName(name);
         if (Objects.nonNull(permission)) {
-            log.warn("Permission {} already exists", name);
+            LOGGER.warn("Permission {} already exists", name);
             return permission;
         }
 
         final var representation = new ScopePermissionRepresentation();
         representation.setName(name);
         representation.addResource(resource.getId());
-        representation.setScopes(Set.of(scope));
+        representation.setScopes(scopes);
         final var policiesIds = policies.stream().map(PolicyRepresentation::getId).collect(Collectors.toSet());
         representation.setPolicies(policiesIds);
         representation.setDecisionStrategy(DecisionStrategy.AFFIRMATIVE);
@@ -160,12 +170,17 @@ public class AuthzService {
         try (final var response = permissionsResource.create(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
                 final var createdResource = permissionsResource.findByName(name);
-                log.info("Created permission {}", name);
+                LOGGER.info("Created permission {}", name);
                 return createdResource;
             } else {
                 throw new InternalServerErrorException("Failed to create permission");
             }
         }
+    }
+
+    UsersResource getUsersResource() {
+        final var realm = config.realm();
+        return keycloak.realm(realm).users();
     }
 
     GroupsResource getGroupsResource() {

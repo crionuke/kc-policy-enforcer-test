@@ -1,6 +1,7 @@
 package com.omgservers.omgservice.version;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.AuthzScope;
+import com.omgservers.omgservice.authz.KeycloakService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
@@ -17,10 +18,10 @@ public class VersionAuthzService {
     static private final String PROJECT_ID_ATTRIBUTE = "project_id";
     static private final String VERSION_ID_ATTRIBUTE = "version_id";
 
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public VersionAuthzService(final AuthzService authzService) {
-        this.authzService = authzService;
+    public VersionAuthzService(final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
     }
 
     public String getResourceName(final Long versionId) {
@@ -36,15 +37,11 @@ public class VersionAuthzService {
                                                  final Long versionId) {
         final var name = getResourceName(versionId);
 
-        final var scopeNames = Set.of(VersionScope.VIEW.getName(),
-                VersionScope.MANAGE.getName(),
-                VersionScope.ADMIN.getName());
-
-        return authzService.createResource(name,
+        return keycloakService.createResource(name,
                 getResourceType(),
                 "Version %d".formatted(versionId),
-                Set.of("/{v}/version/%d/*".formatted(versionId)),
-                scopeNames,
+                Set.of("/{ver}/version/%d/*".formatted(versionId)),
+                AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString()),
                         VERSION_ID_ATTRIBUTE, List.of(versionId.toString())));
@@ -58,7 +55,7 @@ public class VersionAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(versionId);
-        return authzService.createPermission(name, resource, VersionScope.VIEW.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
     }
 
     public String getManagePermissionName(final Long versionId) {
@@ -69,7 +66,7 @@ public class VersionAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(versionId);
-        return authzService.createPermission(name, resource, VersionScope.MANAGE.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
     }
 
     public String getAdminPermissionName(final Long versionId) {
@@ -80,6 +77,6 @@ public class VersionAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(versionId);
-        return authzService.createPermission(name, resource, VersionScope.ADMIN.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
     }
 }

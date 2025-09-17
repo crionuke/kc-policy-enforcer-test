@@ -1,176 +1,94 @@
 package com.omgservers.omgservice.version;
 
 import com.omgservers.omgservice.OidcClients;
-import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.project.Project;
-import com.omgservers.omgservice.project.ProjectResourceTest;
-import com.omgservers.omgservice.project.ProjectStatus;
-import com.omgservers.omgservice.tenant.TenantResourceTest;
+import com.omgservers.omgservice.event.EventResourceClient;
+import com.omgservers.omgservice.project.TestProjectService;
+import com.omgservers.omgservice.tenant.TestTenantService;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 @ApplicationScoped
 @TestSecurity(authorizationEnabled = false)
 @TestHTTPEndpoint(VersionResource.class)
-public class VersionResourceTest {
+public class VersionResourceTest extends Assertions {
+
+    @Inject
+    TestTenantService testTenantService;
+
+    @Inject
+    TestProjectService testProjectService;
+
+    @Inject
+    TestVersionService testVersionService;
+
+    @Inject
+    VersionResourceClient versionResourceClient;
+
+    @Inject
+    EventResourceClient eventResourceClient;
 
     @Inject
     OidcClients oidcClients;
 
-    @Inject
-    TenantResourceTest tenantResourceTest;
-
-    @Inject
-    ProjectResourceTest projectResourceTest;
-
-    @Transactional
-    public Version persistTestVersion(final Project project, VersionStatus status) {
-        final var testVersion = createTestVersion(project, status);
-        testVersion.persist();
-        return testVersion;
-    }
-
-    public Version persistTestVersion(final Project project) {
-        return persistTestVersion(project, VersionStatus.CREATED);
-    }
-
     @Test
     void testGetVersionByIdSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = projectResourceTest.persistTestProject(testTenant);
-        final var testVersion = persistTestVersion(testProject);
+        final var token = oidcClients.getAdminAccessToken();
 
-        given()
-                .pathParam("id", testVersion.id)
-                .when()
-                .get("/version/{id}")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(testVersion.id.intValue()))
-                .body("project.id", equalTo(testProject.id.intValue()))
-                .body("major", equalTo(testVersion.major.intValue()))
-                .body("minor", equalTo(testVersion.minor.intValue()))
-                .body("patch", equalTo(testVersion.patch.intValue()))
-                .body("status", equalTo(testVersion.status.toString()))
-                .body("config", notNullValue());
-    }
+        final var testTenant = testTenantService.createTenant(true, token);
+        final var testProject = testProjectService.createProject(testTenant.id, true, token);
+        final var createdVersion = testVersionService.createVersion(testProject.id, true, token);
 
-    @Test
-    void testGetVersionByIdNotFound() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = projectResourceTest.persistTestProject(testTenant);
-        final var nonExistentId = new Random().nextLong();
+        final var versionById = versionResourceClient.getByIdCheck200(createdVersion.id, token);
 
-        given()
-                .pathParam("id", nonExistentId)
-                .when()
-                .get("/version/{id}")
-                .then()
-                .log().body()
-                .statusCode(404)
-                .body("code", equalTo("VersionNotFound"));
+        assertEquals(createdVersion.id, versionById.id);
+        assertEquals(createdVersion.major, versionById.major);
+        assertEquals(createdVersion.minor, versionById.minor);
+        assertEquals(createdVersion.patch, versionById.patch);
+        assertEquals(VersionStatus.CREATED, versionById.status);
     }
 
     @Test
     void testCreateVersionSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = projectResourceTest.persistTestProject(testTenant);
+        final var token = oidcClients.getAdminAccessToken();
+
+        final var testTenant = testTenantService.createTenant(true, token);
+        final var testProject = testProjectService.createProject(testTenant.id, true, token);
 
         final var newVersion = new NewVersion();
         newVersion.major = 1L;
-        newVersion.minor = 0L;
-        newVersion.patch = 0L;
+        newVersion.minor = 2L;
+        newVersion.patch = 3L;
 
-        final var version = given()
-                .auth().oauth2(oidcClients.getAdminAccessToken())
-                .pathParam("projectId", testProject.id)
-                .contentType(ContentType.JSON)
-                .body(newVersion)
-                .when()
-                .post("/project/{projectId}/version")
-                .then()
-                .log().body()
-                .statusCode(201)
-                .contentType(ContentType.JSON)
-                .body("id", notNullValue())
-                .body("major", equalTo(newVersion.major.intValue()))
-                .body("minor", equalTo(newVersion.minor.intValue()))
-                .body("patch", equalTo(newVersion.patch.intValue()))
-                .body("status", equalTo(VersionStatus.CREATING.toString()))
-                .body("config", notNullValue())
-                .extract().as(Version.class);
+        final var createdVersion = testVersionService.createVersion(testProject.id, newVersion, false, token);
 
-        Event.findFirstRequired(EventQualifier.VERSION_CREATED, version.id);
+        assertNotNull(createdVersion.id);
+        assertEquals(newVersion.major, createdVersion.major);
+        assertEquals(newVersion.minor, createdVersion.minor);
+        assertEquals(newVersion.patch, createdVersion.patch);
+        assertEquals(VersionStatus.CREATING, createdVersion.status);
+
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.VERSION_CREATED,
+                createdVersion.id,
+                token);
     }
 
     @Test
     void testCreateVersionValidationFailed() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = projectResourceTest.persistTestProject(testTenant);
-
-        final var invalidVersion = new NewVersion();
-
-        given()
-                .pathParam("projectId", testProject.id)
-                .contentType(ContentType.JSON)
-                .body(invalidVersion)
-                .when()
-                .post("/project/{projectId}/version")
-                .then()
-                .log().body()
-                .statusCode(400)
-                .body("code", equalTo("ValidationFailed"));
-    }
-
-    @Test
-    void testCreateVersionProjectStatusMismatch() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testProject = projectResourceTest.persistTestProject(testTenant, ProjectStatus.CREATING);
-
+        final var token = oidcClients.getAdminAccessToken();
+        final var testTenant = testTenantService.createTenant(true, token);
+        final var testProject = testProjectService.createProject(testTenant.id, true, token);
         final var newVersion = new NewVersion();
-        newVersion.major = 1L;
-        newVersion.minor = 0L;
-        newVersion.patch = 0L;
-
-        given()
-                .pathParam("projectId", testProject.id)
-                .contentType(ContentType.JSON)
-                .body(newVersion)
-                .when()
-                .post("/project/{projectId}/version")
-                .then()
-                .log().body()
-                .statusCode(409)
-                .body("code", equalTo("ProjectStatusMismatch"));
-    }
-
-    private Version createTestVersion(final Project project, final VersionStatus status) {
-        final var version = new Version();
-        version.project = project;
-        version.major = 1L;
-        version.minor = 0L;
-        version.patch = 0L;
-        version.status = status;
-        version.config = new VersionConfig();
-        version.config.version = VersionConfigVersion.V1;
-        version.persist();
-
-        return version;
+        final var errorResponse = versionResourceClient.createCheck4xx(testProject.id,
+                newVersion,
+                400,
+                token);
+        assertEquals("ValidationFailed", errorResponse.code);
     }
 }

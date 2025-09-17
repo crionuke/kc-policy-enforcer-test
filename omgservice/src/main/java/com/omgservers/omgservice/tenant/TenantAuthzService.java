@@ -1,6 +1,7 @@
 package com.omgservers.omgservice.tenant;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.AuthzScope;
+import com.omgservers.omgservice.authz.KeycloakService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
@@ -16,10 +17,10 @@ public class TenantAuthzService {
 
     static private final String TENANT_ID_ATTRIBUTE = "tenant_id";
 
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public TenantAuthzService(final AuthzService authzService) {
-        this.authzService = authzService;
+    public TenantAuthzService(final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
     }
 
     public String getResourceName(final Long tenantId) {
@@ -33,15 +34,11 @@ public class TenantAuthzService {
     public ResourceRepresentation createResource(final Long tenantId) {
         final var name = getResourceName(tenantId);
 
-        final var scopeNames = Set.of(TenantScope.VIEW.getName(),
-                TenantScope.MANAGE.getName(),
-                TenantScope.ADMIN.getName());
-
-        return authzService.createResource(name,
+        return keycloakService.createResource(name,
                 getResourceType(),
                 "Tenant %d".formatted(tenantId),
-                Set.of("/{v}/tenant/%d/*".formatted(tenantId)),
-                scopeNames,
+                Set.of("/{ver}/tenant/%d/*".formatted(tenantId)),
+                AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }
 
@@ -51,7 +48,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createViewersGroup(final Long tenantId) {
         final var name = getViewersGroupName(tenantId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getManagersGroupName(final Long tenantId) {
@@ -60,7 +57,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createManagersGroup(final Long tenantId) {
         final var name = getManagersGroupName(tenantId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getAdminsGroupName(final Long tenantId) {
@@ -69,7 +66,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createAdminsGroup(final Long tenantId) {
         final var name = getAdminsGroupName(tenantId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getViewersPolicyName(final Long tenantId) {
@@ -79,7 +76,7 @@ public class TenantAuthzService {
     public PolicyRepresentation createViewersPolicy(final Long tenantId,
                                                     final GroupRepresentation viewersGroup) {
         final var name = getViewersPolicyName(tenantId);
-        return authzService.createPolicy(name, Set.of(viewersGroup));
+        return keycloakService.createPolicy(name, Set.of(viewersGroup));
     }
 
     public String getManagersPolicyName(final Long tenantId) {
@@ -89,7 +86,7 @@ public class TenantAuthzService {
     public PolicyRepresentation createManagersPolicy(final Long tenantId,
                                                      final GroupRepresentation managersGroup) {
         final var name = getManagersPolicyName(tenantId);
-        return authzService.createPolicy(name, Set.of(managersGroup));
+        return keycloakService.createPolicy(name, Set.of(managersGroup));
     }
 
     public String getAdminsPolicyName(final Long tenantId) {
@@ -99,7 +96,7 @@ public class TenantAuthzService {
     public PolicyRepresentation createAdminsPolicy(final Long tenantId,
                                                    final GroupRepresentation adminsGroup) {
         final var name = getAdminsPolicyName(tenantId);
-        return authzService.createPolicy(name, Set.of(adminsGroup));
+        return keycloakService.createPolicy(name, Set.of(adminsGroup));
     }
 
     public String getViewPermissionName(final Long tenantId) {
@@ -110,7 +107,7 @@ public class TenantAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(tenantId);
-        return authzService.createPermission(name, resource, TenantScope.VIEW.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
     }
 
     public String getManagePermissionName(final Long tenantId) {
@@ -121,7 +118,7 @@ public class TenantAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(tenantId);
-        return authzService.createPermission(name, resource, TenantScope.MANAGE.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
     }
 
     public String getAdminPermissionName(final Long tenantId) {
@@ -132,6 +129,6 @@ public class TenantAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(tenantId);
-        return authzService.createPermission(name, resource, TenantScope.ADMIN.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
     }
 }

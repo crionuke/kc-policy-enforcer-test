@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.stage;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
 import com.omgservers.omgservice.tenant.TenantAuthzService;
@@ -16,17 +16,17 @@ public class StageCreatedHandler implements EventHandler {
 
     final TenantAuthzService tenantAuthzService;
     final StageAuthzService stageAuthzService;
+    final KeycloakService keycloakService;
     final StageService stageService;
-    final AuthzService authzService;
 
     public StageCreatedHandler(final TenantAuthzService tenantAuthzService,
                                final StageAuthzService stageAuthzService,
-                               final StageService stageService,
-                               final AuthzService authzService) {
+                               final KeycloakService keycloakService,
+                               final StageService stageService) {
         this.tenantAuthzService = tenantAuthzService;
         this.stageAuthzService = stageAuthzService;
         this.stageService = stageService;
-        this.authzService = authzService;
+        this.keycloakService = keycloakService;
     }
 
     @Override
@@ -38,12 +38,15 @@ public class StageCreatedHandler implements EventHandler {
     public void handle(final Long resourceId) {
         final var stage = Stage.findByIdRequired(resourceId);
         final var tenantId = stage.tenant.id;
+        final var createdBy = stage.createdBy;
 
         LOGGER.info("Creating stage {}", resourceId);
 
         final var viewersGroup = stageAuthzService.createViewersGroup(resourceId);
         final var managersGroup = stageAuthzService.createManagersGroup(resourceId);
         final var adminsGroup = stageAuthzService.createAdminsGroup(resourceId);
+
+        keycloakService.joinGroup(createdBy, adminsGroup);
 
         final var stageResource = stageAuthzService.createResource(tenantId, resourceId);
 
@@ -55,9 +58,9 @@ public class StageCreatedHandler implements EventHandler {
         final var tenantManagersPolicyName = tenantAuthzService.getManagersPolicyName(tenantId);
         final var tenantAdminsPolicyName = tenantAuthzService.getAdminsPolicyName(tenantId);
 
-        final var tenantViewersPolicy = authzService.findPolicyByNameRequired(tenantViewersPolicyName);
-        final var tenantManagersPolicy = authzService.findPolicyByNameRequired(tenantManagersPolicyName);
-        final var tenantAdminsPolicy = authzService.findPolicyByNameRequired(tenantAdminsPolicyName);
+        final var tenantViewersPolicy = keycloakService.findPolicyByNameRequired(tenantViewersPolicyName);
+        final var tenantManagersPolicy = keycloakService.findPolicyByNameRequired(tenantManagersPolicyName);
+        final var tenantAdminsPolicy = keycloakService.findPolicyByNameRequired(tenantAdminsPolicyName);
 
         final var viewPermissionPolicies = Set.of(stageViewersPolicy,
                 stageManagersPolicy,

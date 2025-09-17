@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Version;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,19 +21,24 @@ public class BaseEntity extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_id_generator")
     public Long id;
 
+    @Version
+    public Long revision;
+
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    public OffsetDateTime created;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    public OffsetDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
-    public OffsetDateTime modified;
+    @Column(name = "updated_at", nullable = false)
+    public OffsetDateTime updatedAt;
 
     @Column(nullable = false)
     public boolean deleted;
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "<" + id + ">";
+        return "BaseEntity{" +
+                "id=" + id +
+                '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.omgservers.omgservice.stage;
 
-import com.omgservers.omgservice.authz.AuthzService;
+import com.omgservers.omgservice.authz.AuthzScope;
+import com.omgservers.omgservice.authz.KeycloakService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
@@ -17,10 +18,10 @@ public class StageAuthzService {
     static private final String TENANT_ID_ATTRIBUTE = "tenant_id";
     static private final String STAGE_ID_ATTRIBUTE = "stage_id";
 
-    final AuthzService authzService;
+    final KeycloakService keycloakService;
 
-    public StageAuthzService(final AuthzService authzService) {
-        this.authzService = authzService;
+    public StageAuthzService(final KeycloakService keycloakService) {
+        this.keycloakService = keycloakService;
     }
 
     public String getResourceName(final Long stageId) {
@@ -34,15 +35,11 @@ public class StageAuthzService {
     public ResourceRepresentation createResource(final Long tenantId, final Long stageId) {
         final var name = getResourceName(stageId);
 
-        final var scopeNames = Set.of(StageScope.VIEW.getName(),
-                StageScope.MANAGE.getName(),
-                StageScope.ADMIN.getName());
-
-        return authzService.createResource(name,
+        return keycloakService.createResource(name,
                 getResourceType(),
                 "Stage %d".formatted(stageId),
-                Set.of("/{v}/stage/%d/*".formatted(stageId)),
-                scopeNames,
+                Set.of("/{ver}/stage/%d/*".formatted(stageId)),
+                AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));
     }
@@ -53,7 +50,7 @@ public class StageAuthzService {
 
     public GroupRepresentation createViewersGroup(final Long stageId) {
         final var name = getViewersGroupName(stageId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getManagersGroupName(final Long stageId) {
@@ -62,7 +59,7 @@ public class StageAuthzService {
 
     public GroupRepresentation createManagersGroup(final Long stagId) {
         final var name = getManagersGroupName(stagId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getAdminsGroupName(final Long stageId) {
@@ -71,7 +68,7 @@ public class StageAuthzService {
 
     public GroupRepresentation createAdminsGroup(final Long stageId) {
         final var name = getAdminsGroupName(stageId);
-        return authzService.createGroup(name);
+        return keycloakService.createGroup(name);
     }
 
     public String getViewersPolicyName(final Long stageId) {
@@ -81,7 +78,7 @@ public class StageAuthzService {
     public PolicyRepresentation createViewersPolicy(final Long stageId,
                                                     final GroupRepresentation viewersGroup) {
         final var name = getViewersPolicyName(stageId);
-        return authzService.createPolicy(name, Set.of(viewersGroup));
+        return keycloakService.createPolicy(name, Set.of(viewersGroup));
     }
 
     public String getManagersPolicyName(final Long stageId) {
@@ -91,7 +88,7 @@ public class StageAuthzService {
     public PolicyRepresentation createManagersPolicy(final Long stageId,
                                                      final GroupRepresentation managersGroup) {
         final var name = getManagersPolicyName(stageId);
-        return authzService.createPolicy(name, Set.of(managersGroup));
+        return keycloakService.createPolicy(name, Set.of(managersGroup));
     }
 
     public String getAdminsPolicyName(final Long stageId) {
@@ -101,7 +98,7 @@ public class StageAuthzService {
     public PolicyRepresentation createAdminsPolicy(final Long stageId,
                                                    final GroupRepresentation adminsGroup) {
         final var name = getAdminsPolicyName(stageId);
-        return authzService.createPolicy(name, Set.of(adminsGroup));
+        return keycloakService.createPolicy(name, Set.of(adminsGroup));
     }
 
     public String getViewPermissionName(final Long stageId) {
@@ -112,7 +109,7 @@ public class StageAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(stageId);
-        return authzService.createPermission(name, resource, StageScope.VIEW.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
     }
 
     public String getManagePermissionName(final Long stageId) {
@@ -123,7 +120,7 @@ public class StageAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(stageId);
-        return authzService.createPermission(name, resource, StageScope.MANAGE.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
     }
 
     public String getAdminPermissionName(final Long stageId) {
@@ -134,6 +131,6 @@ public class StageAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(stageId);
-        return authzService.createPermission(name, resource, StageScope.ADMIN.getName(), policies);
+        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
     }
 }

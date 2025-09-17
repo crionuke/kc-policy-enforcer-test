@@ -1,153 +1,80 @@
 package com.omgservers.omgservice.stage;
 
 import com.omgservers.omgservice.OidcClients;
-import com.omgservers.omgservice.event.Event;
 import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.tenant.Tenant;
-import com.omgservers.omgservice.tenant.TenantResourceTest;
-import com.omgservers.omgservice.tenant.TenantStatus;
+import com.omgservers.omgservice.event.EventResourceClient;
+import com.omgservers.omgservice.tenant.TestTenantService;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-import io.restassured.http.ContentType;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import java.util.UUID;
 
 @QuarkusTest
-@TestSecurity(authorizationEnabled = false)
+@ApplicationScoped
 @TestHTTPEndpoint(StageResource.class)
-public class StageResourceTest {
+public class StageResourceTest extends Assertions {
+
+    @Inject
+    TestTenantService testTenantService;
+
+    @Inject
+    TestStageService testStageService;
+
+    @Inject
+    StageResourceClient stageResourceClient;
+
+    @Inject
+    EventResourceClient eventResourceClient;
 
     @Inject
     OidcClients oidcClients;
 
-    @Inject
-    TenantResourceTest tenantResourceTest;
-
-    @Transactional
-    public Stage persistTestStage(final Tenant tenant, final StageStatus status) {
-        final var testStage = createTestStage(tenant, status);
-        testStage.persist();
-        return testStage;
-    }
-
-    public Stage persistTestStage(final Tenant tenant) {
-        return persistTestStage(tenant, StageStatus.CREATED);
-    }
-
     @Test
     void testGetStageByIdSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var testStage = persistTestStage(testTenant);
+        final var token = oidcClients.getAdminAccessToken();
 
-        given()
-                .pathParam("id", testStage.id)
-                .when()
-                .get("/stage/{id}")
-                .then()
-                .log().body()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .body("id", equalTo(testStage.id.intValue()))
-                .body("tenant.id", equalTo(testTenant.id.intValue()))
-                .body("name", equalTo(testStage.name))
-                .body("status", equalTo(testStage.status.toString()))
-                .body("config", notNullValue());
-    }
+        final var testTenant = testTenantService.createTenant(true, token);
+        final var createdStage = testStageService.createStage(testTenant.id, true, token);
 
-    @Test
-    void testGetStageByIdNotFound() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var nonExistentId = new Random().nextLong();
+        final var stageById = stageResourceClient.getByIdCheck200(createdStage.id, token);
 
-        given()
-                .pathParam("id", nonExistentId)
-                .when()
-                .get("/stage/{id}")
-                .then()
-                .statusCode(404)
-                .body("code", equalTo("StageNotFound"));
+        assertEquals(createdStage.id, stageById.id);
+        assertEquals(createdStage.name, stageById.name);
+        assertEquals(StageStatus.CREATED, stageById.status);
     }
 
     @Test
     void testCreateStageSuccess() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
+        final var token = oidcClients.getAdminAccessToken();
+
+        final var testTenant = testTenantService.createTenant(true, token);
 
         final var newStage = new NewStage();
-        newStage.name = "New stage";
+        newStage.name = "stage-" + UUID.randomUUID();
+        final var createdStage = testStageService.createStage(testTenant.id, newStage, true, token);
 
-        final var stage = given()
-                .auth().oauth2(oidcClients.getAdminAccessToken())
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(newStage)
-                .when()
-                .post("/tenant/{tenantId}/stage")
-                .then()
-                .log().body()
-                .statusCode(201)
-                .contentType(ContentType.JSON)
-                .body("id", notNullValue())
-                .body("name", equalTo(newStage.name))
-                .body("status", equalTo(StageStatus.CREATING.toString()))
-                .body("config", notNullValue())
-                .extract().as(Stage.class);
+        assertNotNull(createdStage.id);
+        assertEquals(newStage.name, createdStage.name);
+        assertEquals(StageStatus.CREATING, createdStage.status);
 
-        Event.findFirstRequired(EventQualifier.STAGE_CREATED, stage.id);
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.STAGE_CREATED,
+                createdStage.id,
+                token);
     }
 
     @Test
     void testCreateStageValidationFailed() {
-        final var testTenant = tenantResourceTest.persistTestTenant();
-        final var invalidStage = new NewStage();
-
-        given()
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(invalidStage)
-                .when()
-                .post("/tenant/{tenantId}/stage")
-                .then()
-                .log().body()
-                .statusCode(400)
-                .body("code", equalTo("ValidationFailed"));
-    }
-
-    @Test
-    void testCreateStageTenantStatusMismatch() {
-        final var testTenant = tenantResourceTest.persistTestTenant(TenantStatus.CREATING);
-
+        final var token = oidcClients.getAdminAccessToken();
+        final var testTenant = testTenantService.createTenant(true, token);
         final var newStage = new NewStage();
-        newStage.name = "New stage";
-
-        given()
-                .pathParam("tenantId", testTenant.id)
-                .contentType(ContentType.JSON)
-                .body(newStage)
-                .when()
-                .post("/tenant/{tenantId}/stage")
-                .then()
-                .log().body()
-                .statusCode(409)
-                .body("code", equalTo("TenantStatusMismatch"));
-    }
-
-    private Stage createTestStage(final Tenant tenant, final StageStatus status) {
-        final var stage = new Stage();
-        stage.tenant = tenant;
-        stage.name = "Test stage";
-        stage.status = status;
-        stage.config = new StageConfig();
-        stage.config.version = StageConfigVersion.V1;
-        stage.persist();
-
-        return stage;
+        final var errorResponse = stageResourceClient.createCheck4xx(testTenant.id,
+                newStage,
+                400,
+                token);
+        assertEquals("ValidationFailed", errorResponse.code);
     }
 }

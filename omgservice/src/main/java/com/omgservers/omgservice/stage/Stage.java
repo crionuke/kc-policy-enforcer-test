@@ -1,6 +1,6 @@
 package com.omgservers.omgservice.stage;
 
-import com.omgservers.omgservice.base.BaseEntity;
+import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.StageNotFound;
 import com.omgservers.omgservice.errors.StageStatusMismatch;
 import com.omgservers.omgservice.errors.StageTenantMismatch;
@@ -17,7 +17,7 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "omgservice_stage")
-public class Stage extends BaseEntity {
+public class Stage extends Resource {
 
     public static Stage findByIdRequired(final Long stageId) {
         return Stage.<Stage>findByIdOptional(stageId)
