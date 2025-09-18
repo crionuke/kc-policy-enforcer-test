@@ -54,5 +54,11 @@ public class Tenant extends Resource {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "Tenant{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

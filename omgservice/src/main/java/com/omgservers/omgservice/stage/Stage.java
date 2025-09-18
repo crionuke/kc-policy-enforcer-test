@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -21,6 +22,11 @@ public class Stage extends Resource {
 
     public static Stage findByIdRequired(final Long stageId) {
         return Stage.<Stage>findByIdOptional(stageId)
+                .orElseThrow(() -> new StageNotFound(stageId));
+    }
+
+    public static Stage findByIdLocked(final Long stageId) {
+        return Stage.<Stage>findByIdOptional(stageId, LockModeType.OPTIMISTIC)
                 .orElseThrow(() -> new StageNotFound(stageId));
     }
 
@@ -39,6 +45,16 @@ public class Stage extends Resource {
     @Column(nullable = false, columnDefinition = "jsonb")
     public StageConfig config;
 
+    public boolean finishCreation(final StageConfig.Authz authz) {
+        if (status != StageStatus.CREATING) {
+            return false;
+        }
+
+        status = StageStatus.CREATED;
+        config.authz = authz;
+        return true;
+    }
+
     public void ensureTenant(final Long requiredTenantId) {
         final var stageTenantId = tenant.id;
         if (!stageTenantId.equals(requiredTenantId)) {
@@ -52,5 +68,13 @@ public class Stage extends Resource {
         if (!stageStatus.equals(requiredStatus)) {
             throw new StageStatusMismatch(id, stageStatus, requiredStatus);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Stage{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

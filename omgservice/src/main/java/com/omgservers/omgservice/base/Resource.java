@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class Resource extends BaseEntity {
+public abstract class Resource extends BaseEntity {
 
     @Column(name = "created_by", nullable = false, updatable = false)
     public String createdBy;

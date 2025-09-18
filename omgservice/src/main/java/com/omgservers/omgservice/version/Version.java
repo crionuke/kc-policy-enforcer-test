@@ -1,5 +1,6 @@
 package com.omgservers.omgservice.version;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.VersionNotFound;
 import com.omgservers.omgservice.errors.VersionProjectMismatch;
@@ -11,8 +12,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -22,6 +25,11 @@ public class Version extends Resource {
 
     public static Version findByIdRequired(final Long versionId) {
         return Version.<Version>findByIdOptional(versionId)
+                .orElseThrow(() -> new VersionNotFound(versionId));
+    }
+
+    public static Version findByIdLocked(final Long versionId) {
+        return Version.<Version>findByIdOptional(versionId, LockModeType.OPTIMISTIC)
                 .orElseThrow(() -> new VersionNotFound(versionId));
     }
 
@@ -46,6 +54,21 @@ public class Version extends Resource {
     @Column(nullable = false, columnDefinition = "jsonb")
     public VersionConfig config;
 
+    @Transient
+    @JsonIgnore
+    public String getSemver() {
+        return "%d.%d.%d".formatted(major, minor, patch);
+    }
+
+    public boolean finishCreation() {
+        if (status != VersionStatus.CREATING) {
+            return false;
+        }
+
+        status = VersionStatus.CREATED;
+        return true;
+    }
+
     public void ensureTenant(final Long requiredTenantId) {
         final var versionTenantId = project.tenant.id;
         if (!versionTenantId.equals(requiredTenantId)) {
@@ -66,5 +89,13 @@ public class Version extends Resource {
         if (!versionStatus.equals(requiredStatus)) {
             throw new VersionStatusMismatch(id, versionStatus, requiredStatus);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Version{" +
+                "id=" + id +
+                ", semver=" + getSemver() +
+                '}';
     }
 }

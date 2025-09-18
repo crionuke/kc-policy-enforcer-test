@@ -29,22 +29,20 @@ public class VersionResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public void getByIdCheck403(final Long versionId, final String token) {
-        getById(versionId, token)
-                .statusCode(403);
-    }
-
-    public Version getByIdCheck200(final Long versionId, final String token) {
-        return getById(versionId, token)
+    public Version getByIdCheck200(final Long projectId,
+                                   final Long versionId,
+                                   final String token) {
+        return getById(projectId, versionId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .extract().as(Version.class);
     }
 
-    public ErrorResponse getByIdCheck4xx(final Long versionId,
+    public ErrorResponse getByIdCheck4xx(final Long projectId,
+                                         final Long versionId,
                                          final int statusCode,
                                          final String token) {
-        return getById(versionId, token)
+        return getById(projectId, versionId, token)
                 .statusCode(statusCode)
                 .contentType(ContentType.JSON)
                 .extract().as(ErrorResponse.class);
@@ -65,14 +63,16 @@ public class VersionResourceClient {
                 .log().all();
     }
 
-    private ValidatableResponseOptions<?, ?> getById(final Long versionId,
+    private ValidatableResponseOptions<?, ?> getById(final Long projectId,
+                                                     final Long versionId,
                                                      final String token) {
         return given()
                 .auth().oauth2(token)
+                .pathParam("projectId", projectId)
                 .pathParam("id", versionId)
                 .log().all()
                 .when()
-                .get("/version/{id}")
+                .get("/project/{projectId}/version/{id}")
                 .then()
                 .log().all();
     }

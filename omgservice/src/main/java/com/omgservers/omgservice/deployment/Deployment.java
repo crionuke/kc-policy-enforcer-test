@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -28,10 +29,15 @@ public class Deployment extends Resource {
                 .orElseThrow(() -> new DeploymentNotFound(deploymentId));
     }
 
-    public static List<DeploymentProjectionResource> listByProjectId(final Long projectId) {
+    public static Deployment findByIdLocked(final Long deploymentId) {
+        return Deployment.<Deployment>findByIdOptional(deploymentId, LockModeType.OPTIMISTIC)
+                .orElseThrow(() -> new DeploymentNotFound(deploymentId));
+    }
+
+    public static List<DeploymentProjection> listByProjectId(final Long projectId) {
         return Deployment.
                 <Deployment>find("version.project.id = ?1 order by createdAt asc", projectId)
-                .project(DeploymentProjectionResource.class)
+                .project(DeploymentProjection.class)
                 .list();
     }
 
@@ -50,6 +56,15 @@ public class Deployment extends Resource {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     public DeploymentConfig config;
+
+    public boolean finishCreation() {
+        if (status != DeploymentStatus.CREATING) {
+            return false;
+        }
+
+        status = DeploymentStatus.CREATED;
+        return true;
+    }
 
     public void ensureTenant(final Long requiredTenantId) {
         final var deploymentTenantId = stage.tenant.id;
@@ -70,5 +85,12 @@ public class Deployment extends Resource {
         if (!deploymentVersionId.equals(requiredVersionId)) {
             throw new DeploymentVersionMismatch(id, deploymentVersionId, requiredVersionId);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Deployment{" +
+                "id=" + id +
+                '}';
     }
 }

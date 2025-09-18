@@ -56,7 +56,7 @@ public class DeploymentResourceTest extends Assertions {
         final var createdDeployment = testDeploymentService
                 .createDeployment(testStage.id, testVersion.id, true, token);
 
-        final var deploymentById = deploymentResourceClient.getByIdCheck200(createdDeployment.id, token);
+        final var deploymentById = deploymentResourceClient.getByIdCheck200(testStage.id, createdDeployment.id, token);
 
         assertEquals(createdDeployment.id, deploymentById.id);
         assertEquals(createdDeployment.version.id, deploymentById.version.id);

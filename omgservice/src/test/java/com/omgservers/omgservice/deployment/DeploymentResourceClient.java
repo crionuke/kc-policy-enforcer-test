@@ -10,10 +10,10 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class DeploymentResourceClient {
 
-    public Deployment createCheck201(final Long projectId,
+    public Deployment createCheck201(final Long stageId,
                                      final NewDeployment newDeployment,
                                      final String token) {
-        return create(projectId, newDeployment, token)
+        return create(stageId, newDeployment, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
                 .extract().as(Deployment.class);
@@ -29,17 +29,20 @@ public class DeploymentResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Deployment getByIdCheck200(final Long deploymentId, final String token) {
-        return getById(deploymentId, token)
+    public Deployment getByIdCheck200(final Long stageId,
+                                      final Long deploymentId,
+                                      final String token) {
+        return getById(stageId, deploymentId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .extract().as(Deployment.class);
     }
 
-    public ErrorResponse getByIdCheck4xx(final Long deploymentId,
+    public ErrorResponse getByIdCheck4xx(final Long stageId,
+                                         final Long deploymentId,
                                          final int statusCode,
                                          final String token) {
-        return getById(deploymentId, token)
+        return getById(stageId, deploymentId, token)
                 .statusCode(statusCode)
                 .contentType(ContentType.JSON)
                 .extract().as(ErrorResponse.class);
@@ -67,14 +70,16 @@ public class DeploymentResourceClient {
                 .log().all();
     }
 
-    private ValidatableResponseOptions<?, ?> getById(final Long deploymentId,
+    private ValidatableResponseOptions<?, ?> getById(final Long stageId,
+                                                     final Long deploymentId,
                                                      final String token) {
         return given()
                 .auth().oauth2(token)
+                .pathParam("stageId", stageId)
                 .pathParam("id", deploymentId)
                 .log().all()
                 .when()
-                .get("/deployment/{id}")
+                .get("/stage/{stageId}/deployment/{id}")
                 .then()
                 .log().all();
     }

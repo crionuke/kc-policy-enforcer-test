@@ -12,12 +12,12 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
-import org.jboss.resteasy.reactive.RestPath;
 
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,14 +33,17 @@ public class DeploymentResource {
     }
 
     @GET
-    @Path("/deployment/{id}")
-    public Deployment getById(@RestPath @NotNull final Long id) {
-        return Deployment.findByIdRequired(id);
+    @Path("/stage/{stageId}/deployment/{id}")
+    public Deployment getById(@PathParam("stageId") @NotNull final Long stageId,
+                              @PathParam("id") @NotNull final Long id) {
+        final var deployment = Deployment.findByIdRequired(id);
+        deployment.ensureStage(stageId);
+        return deployment;
     }
 
     @GET
     @Path("/project/{projectId}/deployment")
-    public Deployments getByProjectId(@RestPath @NotNull final Long projectId) {
+    public Deployments getByProjectId(@PathParam("projectId") @NotNull final Long projectId) {
         final var list = Deployment.listByProjectId(projectId);
         final var deployments = new Deployments();
         deployments.size = list.size();
@@ -53,7 +56,7 @@ public class DeploymentResource {
     @ResponseStatus(201)
     @Path("/stage/{stageId}/deployment")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Deployment create(@RestPath @NotNull final Long stageId,
+    public Deployment create(@PathParam("stageId") @NotNull final Long stageId,
                              @NotNull @Valid final NewDeployment newDeployment) {
         final var stage = Stage.findByIdRequired(stageId);
         stage.ensureCreatedStatus();

@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -21,6 +22,11 @@ public class Project extends Resource {
 
     public static Project findByIdRequired(final Long projectId) {
         return Project.<Project>findByIdOptional(projectId)
+                .orElseThrow(() -> new ProjectNotFound(projectId));
+    }
+
+    public static Project findByIdLocked(final Long projectId) {
+        return Project.<Project>findByIdOptional(projectId, LockModeType.OPTIMISTIC)
                 .orElseThrow(() -> new ProjectNotFound(projectId));
     }
 
@@ -39,6 +45,16 @@ public class Project extends Resource {
     @Column(nullable = false, columnDefinition = "jsonb")
     public ProjectConfig config;
 
+    public boolean finishCreation(final ProjectConfig.Authz authz) {
+        if (status != ProjectStatus.CREATING) {
+            return false;
+        }
+
+        status = ProjectStatus.CREATED;
+        config.authz = authz;
+        return true;
+    }
+
     public void ensureTenant(final Long requiredTenantId) {
         final var projectTenantId = tenant.id;
         if (!projectTenantId.equals(requiredTenantId)) {
@@ -52,5 +68,13 @@ public class Project extends Resource {
         if (!projectStatus.equals(requiredStatus)) {
             throw new ProjectStatusMismatch(id, projectStatus, requiredStatus);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

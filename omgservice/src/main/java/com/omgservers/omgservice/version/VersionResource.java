@@ -11,6 +11,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.Claim;
@@ -32,9 +33,12 @@ public class VersionResource {
     }
 
     @GET
-    @Path("/version/{id}")
-    public Version getById(@NotNull final Long id) {
-        return Version.findByIdRequired(id);
+    @Path("/project/{projectId}/version/{id}")
+    public Version getById(@PathParam("projectId") @NotNull final Long projectId,
+                           @PathParam("id") @NotNull final Long id) {
+        final var version = Version.findByIdRequired(id);
+        version.ensureProject(projectId);
+        return version;
     }
 
     @POST
@@ -42,7 +46,7 @@ public class VersionResource {
     @ResponseStatus(201)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/project/{projectId}/version")
-    public Version create(@RestPath @NotNull final Long projectId,
+    public Version create(@PathParam("projectId") @NotNull final Long projectId,
                           @NotNull @Valid final NewVersion newVersion) {
         final var project = Project.findByIdRequired(projectId);
         project.ensureCreatedStatus();

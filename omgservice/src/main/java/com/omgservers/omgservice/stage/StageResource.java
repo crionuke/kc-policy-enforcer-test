@@ -11,6 +11,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.Claim;
@@ -42,7 +43,7 @@ public class StageResource {
     @ResponseStatus(201)
     @Path("/tenant/{tenantId}/stage")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Stage create(@RestPath @NotNull final Long tenantId,
+    public Stage create(@PathParam("tenantId") @NotNull final Long tenantId,
                         @NotNull @Valid final NewStage newStage) {
         final var tenant = Tenant.findByIdRequired(tenantId);
         tenant.ensureCreatedStatus();

@@ -1,40 +1,20 @@
 package com.omgservers.omgservice.deployment;
 
-import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.project.ProjectAuthzService;
-import com.omgservers.omgservice.stage.StageAuthzService;
-import com.omgservers.omgservice.tenant.TenantAuthzService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Set;
 
 @ApplicationScoped
 public class DeploymentCreatedHandler implements EventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentCreatedHandler.class);
 
-    final DeploymentAuthzService deploymentAuthzService;
-    final ProjectAuthzService projectAuthzService;
-    final TenantAuthzService tenantAuthzService;
-    final StageAuthzService stageAuthzService;
-    final DeploymentService deploymentService;
-    final KeycloakService keycloakService;
+    final DeploymentCreatedHandler thisHandler;
 
-    public DeploymentCreatedHandler(final DeploymentAuthzService deploymentAuthzService,
-                                    final ProjectAuthzService projectAuthzService,
-                                    final TenantAuthzService tenantAuthzService,
-                                    final StageAuthzService stageAuthzService,
-                                    final DeploymentService deploymentService,
-                                    final KeycloakService keycloakService) {
-        this.deploymentAuthzService = deploymentAuthzService;
-        this.projectAuthzService = projectAuthzService;
-        this.tenantAuthzService = tenantAuthzService;
-        this.stageAuthzService = stageAuthzService;
-        this.deploymentService = deploymentService;
-        this.keycloakService = keycloakService;
+    public DeploymentCreatedHandler(final DeploymentCreatedHandler thisHandler) {
+        this.thisHandler = thisHandler;
     }
 
     @Override
@@ -45,60 +25,15 @@ public class DeploymentCreatedHandler implements EventHandler {
     @Override
     public void handle(final Long resourceId) {
         final var deployment = Deployment.findByIdRequired(resourceId);
-        final var tenantId = deployment.stage.tenant.id;
-        final var stageId = deployment.stage.id;
-        final var projectId = deployment.version.project.id;
+        LOGGER.info("Creating deployment {}", deployment);
 
-        LOGGER.info("Creating deployment {}", resourceId);
+        thisHandler.finish(resourceId);
+        LOGGER.info("Deployment {} created successfully", deployment);
+    }
 
-        final var versionResources = deploymentAuthzService.createResource(tenantId, stageId, resourceId);
-
-        final var tenantViewersPolicyName = tenantAuthzService.getViewersPolicyName(tenantId);
-        final var tenantManagersPolicyName = tenantAuthzService.getManagersPolicyName(tenantId);
-        final var tenantAdminsPolicyName = tenantAuthzService.getAdminsPolicyName(tenantId);
-
-        final var tenantViewersPolicy = keycloakService.findPolicyByNameRequired(tenantViewersPolicyName);
-        final var tenantManagersPolicy = keycloakService.findPolicyByNameRequired(tenantManagersPolicyName);
-        final var tenantAdminsPolicy = keycloakService.findPolicyByNameRequired(tenantAdminsPolicyName);
-
-        final var stageViewersPolicyName = stageAuthzService.getViewersPolicyName(stageId);
-        final var stageManagersPolicyName = stageAuthzService.getManagersPolicyName(stageId);
-        final var stageAdminsPolicyName = stageAuthzService.getAdminsPolicyName(stageId);
-
-        final var stageViewersPolicy = keycloakService.findPolicyByNameRequired(stageViewersPolicyName);
-        final var stageManagersPolicy = keycloakService.findPolicyByNameRequired(stageManagersPolicyName);
-        final var stageAdminsPolicy = keycloakService.findPolicyByNameRequired(stageAdminsPolicyName);
-
-        final var projectViewersPolicyName = projectAuthzService.getViewersPolicyName(projectId);
-        final var projectManagersPolicyName = projectAuthzService.getManagersPolicyName(projectId);
-        final var projectAdminsPolicyName = projectAuthzService.getAdminsPolicyName(projectId);
-
-        final var projectViewersPolicy = keycloakService.findPolicyByNameRequired(projectViewersPolicyName);
-        final var projectManagersPolicy = keycloakService.findPolicyByNameRequired(projectManagersPolicyName);
-        final var projectAdminsPolicy = keycloakService.findPolicyByNameRequired(projectAdminsPolicyName);
-
-        final var viewPermissionPolicies = Set.of(stageViewersPolicy,
-                stageManagersPolicy,
-                stageAdminsPolicy,
-                projectViewersPolicy,
-                projectManagersPolicy,
-                projectAdminsPolicy,
-                tenantViewersPolicy,
-                tenantManagersPolicy,
-                tenantAdminsPolicy);
-        deploymentAuthzService.createViewPermission(resourceId, versionResources, viewPermissionPolicies);
-
-        final var managePermissionPolicies = Set.of(stageManagersPolicy,
-                stageAdminsPolicy,
-                projectManagersPolicy,
-                projectAdminsPolicy,
-                tenantManagersPolicy,
-                tenantAdminsPolicy);
-        deploymentAuthzService.createManagePermission(resourceId, versionResources, managePermissionPolicies);
-
-        final var adminPermissionPolicies = Set.of(stageAdminsPolicy, projectAdminsPolicy, tenantAdminsPolicy);
-        deploymentAuthzService.createAdminPermission(resourceId, versionResources, adminPermissionPolicies);
-
-        deploymentService.switchStateFromCreatingToCreated(resourceId);
+    @Transactional
+    public void finish(final Long deploymentId) {
+        final var version = Deployment.findByIdLocked(deploymentId);
+        version.finishCreation();
     }
 }

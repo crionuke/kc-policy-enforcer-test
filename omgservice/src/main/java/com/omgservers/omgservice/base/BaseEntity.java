@@ -14,7 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 
 @MappedSuperclass
-public class BaseEntity extends PanacheEntityBase {
+public abstract class BaseEntity extends PanacheEntityBase {
 
     @Id
     @SequenceGenerator(name = "entity_id_generator", sequenceName = "omgservice_id_sequence")

@@ -45,7 +45,7 @@ public class VersionResourceTest extends Assertions {
         final var testProject = testProjectService.createProject(testTenant.id, true, token);
         final var createdVersion = testVersionService.createVersion(testProject.id, true, token);
 
-        final var versionById = versionResourceClient.getByIdCheck200(createdVersion.id, token);
+        final var versionById = versionResourceClient.getByIdCheck200(testProject.id, createdVersion.id, token);
 
         assertEquals(createdVersion.id, versionById.id);
         assertEquals(createdVersion.major, versionById.major);
