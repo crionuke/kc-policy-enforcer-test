@@ -70,6 +70,18 @@ public class Project extends Resource {
         }
     }
 
+    public ProjectProjection toProjection() {
+        return new ProjectProjection(id,
+                createdBy,
+                createdAt,
+                updatedAt,
+                tenant.id,
+                tenant.name,
+                name,
+                status,
+                deleted);
+    }
+
     @Override
     public String toString() {
         return "Project{" +

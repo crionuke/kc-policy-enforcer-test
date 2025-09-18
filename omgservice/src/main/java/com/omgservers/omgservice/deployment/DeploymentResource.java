@@ -1,11 +1,6 @@
 package com.omgservers.omgservice.deployment;
 
-import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.event.EventService;
-import com.omgservers.omgservice.stage.Stage;
-import com.omgservers.omgservice.version.Version;
 import jakarta.inject.Provider;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -23,60 +18,30 @@ import org.jboss.resteasy.reactive.ResponseStatus;
 @Produces(MediaType.APPLICATION_JSON)
 public class DeploymentResource {
 
-    final EventService eventService;
+    final DeploymentService deploymentService;
     final Provider<String> subClaim;
 
-    public DeploymentResource(final EventService eventService,
+    public DeploymentResource(final DeploymentService deploymentService,
                               final @Claim(standard = Claims.sub) Provider<String> subClaim) {
-        this.eventService = eventService;
+        this.deploymentService = deploymentService;
         this.subClaim = subClaim;
     }
 
     @GET
     @Path("/stage/{stageId}/deployment/{id}")
-    public Deployment getById(@PathParam("stageId") @NotNull final Long stageId,
+    public DeploymentProjection getById(@PathParam("stageId") @NotNull final Long stageId,
                               @PathParam("id") @NotNull final Long id) {
-        final var deployment = Deployment.findByIdRequired(id);
-        deployment.ensureStage(stageId);
-        return deployment;
-    }
-
-    @GET
-    @Path("/project/{projectId}/deployment")
-    public Deployments getByProjectId(@PathParam("projectId") @NotNull final Long projectId) {
-        final var list = Deployment.listByProjectId(projectId);
-        final var deployments = new Deployments();
-        deployments.size = list.size();
-        deployments.list = list;
-        return deployments;
+        return deploymentService.getById(stageId, id)
+                .toProjection();
     }
 
     @POST
-    @Transactional
     @ResponseStatus(201)
     @Path("/stage/{stageId}/deployment")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Deployment create(@PathParam("stageId") @NotNull final Long stageId,
+    public DeploymentProjection create(@PathParam("stageId") @NotNull final Long stageId,
                              @NotNull @Valid final NewDeployment newDeployment) {
-        final var stage = Stage.findByIdRequired(stageId);
-        stage.ensureCreatedStatus();
-
-        final var versionId = newDeployment.versionId;
-        final var version = Version.findByIdRequired(versionId);
-        version.ensureTenant(stage.tenant.id);
-        version.ensureCreatedStatus();
-
-        final var deployment = new Deployment();
-        deployment.createdBy = subClaim.get();
-        deployment.stage = stage;
-        deployment.version = version;
-        deployment.status = DeploymentStatus.CREATING;
-        deployment.config = new DeploymentConfig();
-        deployment.config.version = DeploymentConfigVersion.V1;
-        deployment.persist();
-
-        eventService.create(EventQualifier.DEPLOYMENT_CREATED, deployment.id);
-
-        return deployment;
+        return deploymentService.create(stageId, newDeployment, subClaim.get())
+                .toProjection();
     }
 }

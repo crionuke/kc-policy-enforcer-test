@@ -16,9 +16,9 @@ public class TestTenantService {
     @Inject
     TestEventService testEventService;
 
-    public Tenant createTenant(final NewTenant newTenant,
-                               final boolean process,
-                               final String token) {
+    public TenantProjection createTenant(final NewTenant newTenant,
+                                         final boolean process,
+                                         final String token) {
         final var createdTenant = tenantResourceClient.createCheck201(newTenant, token);
         if (process) {
             testEventService.process(EventQualifier.TENANT_CREATED, createdTenant.id);
@@ -27,7 +27,7 @@ public class TestTenantService {
         return createdTenant;
     }
 
-    public Tenant createTenant(final boolean process, final String token) {
+    public TenantProjection createTenant(final boolean process, final String token) {
         final var newTenant = new NewTenant();
         newTenant.name = "tenant-" + UUID.randomUUID();
         return createTenant(newTenant, process, token);

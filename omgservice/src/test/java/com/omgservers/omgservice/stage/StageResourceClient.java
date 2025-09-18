@@ -10,13 +10,13 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class StageResourceClient {
 
-    public Stage createCheck201(final Long tenantId,
+    public StageProjection createCheck201(final Long tenantId,
                                 final NewStage newStage,
                                 final String token) {
         return create(tenantId, newStage, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
-                .extract().as(Stage.class);
+                .extract().as(StageProjection.class);
     }
 
     public ErrorResponse createCheck4xx(final Long tenantId,
@@ -29,11 +29,11 @@ public class StageResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Stage getByIdCheck200(final Long stageId, final String token) {
+    public StageProjection getByIdCheck200(final Long stageId, final String token) {
         return getById(stageId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .extract().as(Stage.class);
+                .extract().as(StageProjection.class);
     }
 
     public ErrorResponse getByIdCheck4xx(final Long stageId,

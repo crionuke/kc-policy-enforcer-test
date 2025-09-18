@@ -4,6 +4,7 @@ import com.omgservers.omgservice.base.Resource;
 import com.omgservers.omgservice.errors.StageNotFound;
 import com.omgservers.omgservice.errors.StageStatusMismatch;
 import com.omgservers.omgservice.errors.StageTenantMismatch;
+import com.omgservers.omgservice.project.ProjectProjection;
 import com.omgservers.omgservice.tenant.Tenant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -68,6 +69,18 @@ public class Stage extends Resource {
         if (!stageStatus.equals(requiredStatus)) {
             throw new StageStatusMismatch(id, stageStatus, requiredStatus);
         }
+    }
+
+    public StageProjection toProjection() {
+        return new StageProjection(id,
+                createdBy,
+                createdAt,
+                updatedAt,
+                tenant.id,
+                tenant.name,
+                name,
+                status,
+                deleted);
     }
 
     @Override

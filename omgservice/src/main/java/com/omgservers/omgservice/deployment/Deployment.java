@@ -18,8 +18,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.List;
-
 @Entity
 @Table(name = "omgservice_deployment")
 public class Deployment extends Resource {
@@ -32,13 +30,6 @@ public class Deployment extends Resource {
     public static Deployment findByIdLocked(final Long deploymentId) {
         return Deployment.<Deployment>findByIdOptional(deploymentId, LockModeType.OPTIMISTIC)
                 .orElseThrow(() -> new DeploymentNotFound(deploymentId));
-    }
-
-    public static List<DeploymentProjection> listByProjectId(final Long projectId) {
-        return Deployment.
-                <Deployment>find("version.project.id = ?1 order by createdAt asc", projectId)
-                .project(DeploymentProjection.class)
-                .list();
     }
 
     @ManyToOne
@@ -85,6 +76,23 @@ public class Deployment extends Resource {
         if (!deploymentVersionId.equals(requiredVersionId)) {
             throw new DeploymentVersionMismatch(id, deploymentVersionId, requiredVersionId);
         }
+    }
+
+    public DeploymentProjection toProjection() {
+        return new DeploymentProjection(id,
+                createdBy,
+                createdAt,
+                updatedAt,
+                stage.tenant.id,
+                stage.tenant.name,
+                stage.id,
+                stage.name,
+                version.id,
+                version.major,
+                version.minor,
+                version.patch,
+                status,
+                deleted);
     }
 
     @Override

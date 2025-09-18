@@ -10,11 +10,11 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class TenantResourceClient {
 
-    public Tenant createCheck201(final NewTenant newTenant, final String token) {
+    public TenantProjection createCheck201(final NewTenant newTenant, final String token) {
         return create(newTenant, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
-                .extract().as(Tenant.class);
+                .extract().as(TenantProjection.class);
     }
 
     public ErrorResponse createCheck4xx(final NewTenant newTenant,
@@ -26,11 +26,11 @@ public class TenantResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Tenant getByIdCheck200(final Long tenantId, final String token) {
+    public TenantProjection getByIdCheck200(final Long tenantId, final String token) {
         return getById(tenantId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .extract().as(Tenant.class);
+                .extract().as(TenantProjection.class);
     }
 
     public ErrorResponse getByIdCheck4xx(final Long tenantId,

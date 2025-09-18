@@ -1,10 +1,6 @@
 package com.omgservers.omgservice.project;
 
-import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.event.EventService;
-import com.omgservers.omgservice.tenant.Tenant;
 import jakarta.inject.Provider;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -22,42 +18,29 @@ import org.jboss.resteasy.reactive.ResponseStatus;
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
-    final EventService eventService;
+    final ProjectService projectService;
     final Provider<String> subClaim;
 
-    public ProjectResource(final EventService eventService,
-                              final @Claim(standard = Claims.sub) Provider<String> subClaim) {
-        this.eventService = eventService;
+    public ProjectResource(final ProjectService projectService,
+                           final @Claim(standard = Claims.sub) Provider<String> subClaim) {
+        this.projectService = projectService;
         this.subClaim = subClaim;
     }
 
     @GET
     @Path("/project/{id}")
-    public Project getById(@NotNull final Long id) {
-        return Project.findByIdRequired(id);
+    public ProjectProjection getById(@NotNull final Long id) {
+        return projectService.getById(id)
+                .toProjection();
     }
 
     @POST
-    @Transactional
     @ResponseStatus(201)
     @Path("/tenant/{tenantId}/project")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Project create(@PathParam("tenantId") @NotNull final Long tenantId,
-                          @NotNull @Valid final NewProject newProject) {
-        final var tenant = Tenant.findByIdRequired(tenantId);
-        tenant.ensureCreatedStatus();
-
-        final var project = new Project();
-        project.createdBy = subClaim.get();
-        project.tenant = tenant;
-        project.name = newProject.name;
-        project.status = ProjectStatus.CREATING;
-        project.config = new ProjectConfig();
-        project.config.version = ProjectConfigVersion.V1;
-        project.persist();
-
-        eventService.create(EventQualifier.PROJECT_CREATED, project.id);
-        
-        return project;
+    public ProjectProjection create(@PathParam("tenantId") @NotNull final Long tenantId,
+                                    @NotNull @Valid final NewProject newProject) {
+        return projectService.create(tenantId, newProject, subClaim.get())
+                .toProjection();
     }
 }

@@ -10,13 +10,13 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class DeploymentResourceClient {
 
-    public Deployment createCheck201(final Long stageId,
+    public DeploymentProjection createCheck201(final Long stageId,
                                      final NewDeployment newDeployment,
                                      final String token) {
         return create(stageId, newDeployment, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
-                .extract().as(Deployment.class);
+                .extract().as(DeploymentProjection.class);
     }
 
     public ErrorResponse createCheck4xx(final Long stageId,
@@ -29,13 +29,13 @@ public class DeploymentResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Deployment getByIdCheck200(final Long stageId,
+    public DeploymentProjection getByIdCheck200(final Long stageId,
                                       final Long deploymentId,
                                       final String token) {
         return getById(stageId, deploymentId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .extract().as(Deployment.class);
+                .extract().as(DeploymentProjection.class);
     }
 
     public ErrorResponse getByIdCheck4xx(final Long stageId,
@@ -46,13 +46,6 @@ public class DeploymentResourceClient {
                 .statusCode(statusCode)
                 .contentType(ContentType.JSON)
                 .extract().as(ErrorResponse.class);
-    }
-
-    public Deployments getByProjectIdCheck200(final Long projectId, final String token) {
-        return getByProjectId(projectId, token)
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .extract().as(Deployments.class);
     }
 
     private ValidatableResponseOptions<?, ?> create(final Long stageId,

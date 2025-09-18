@@ -1,10 +1,6 @@
 package com.omgservers.omgservice.version;
 
-import com.omgservers.omgservice.event.EventQualifier;
-import com.omgservers.omgservice.event.EventService;
-import com.omgservers.omgservice.project.Project;
 import jakarta.inject.Provider;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -17,53 +13,35 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.ResponseStatus;
-import org.jboss.resteasy.reactive.RestPath;
 
 @Path("/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class VersionResource {
 
-    final EventService eventService;
+    final VersionService versionService;
     final Provider<String> subClaim;
 
-    public VersionResource(final EventService eventService,
+    public VersionResource(final VersionService versionService,
                            final @Claim(standard = Claims.sub) Provider<String> subClaim) {
-        this.eventService = eventService;
+        this.versionService = versionService;
         this.subClaim = subClaim;
     }
 
     @GET
     @Path("/project/{projectId}/version/{id}")
-    public Version getById(@PathParam("projectId") @NotNull final Long projectId,
-                           @PathParam("id") @NotNull final Long id) {
-        final var version = Version.findByIdRequired(id);
-        version.ensureProject(projectId);
-        return version;
+    public VersionProjection getById(@PathParam("projectId") @NotNull final Long projectId,
+                                     @PathParam("id") @NotNull final Long id) {
+        return versionService.getById(projectId, id)
+                .toProjection();
     }
 
     @POST
-    @Transactional
     @ResponseStatus(201)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/project/{projectId}/version")
-    public Version create(@PathParam("projectId") @NotNull final Long projectId,
-                          @NotNull @Valid final NewVersion newVersion) {
-        final var project = Project.findByIdRequired(projectId);
-        project.ensureCreatedStatus();
-
-        final var version = new Version();
-        version.createdBy = subClaim.get();
-        version.project = project;
-        version.major = newVersion.major;
-        version.minor = newVersion.minor;
-        version.patch = newVersion.patch;
-        version.status = VersionStatus.CREATING;
-        version.config = new VersionConfig();
-        version.config.version = VersionConfigVersion.V1;
-        version.persist();
-
-        eventService.create(EventQualifier.VERSION_CREATED, version.id);
-
-        return version;
+    public VersionProjection create(@PathParam("projectId") @NotNull final Long projectId,
+                                    @NotNull @Valid final NewVersion newVersion) {
+        return versionService.create(projectId, newVersion, subClaim.get())
+                .toProjection();
     }
 }

@@ -59,41 +59,8 @@ public class DeploymentResourceTest extends Assertions {
         final var deploymentById = deploymentResourceClient.getByIdCheck200(testStage.id, createdDeployment.id, token);
 
         assertEquals(createdDeployment.id, deploymentById.id);
-        assertEquals(createdDeployment.version.id, deploymentById.version.id);
+        assertEquals(createdDeployment.versionId, deploymentById.versionId);
         assertEquals(DeploymentStatus.CREATED, deploymentById.status);
-    }
-
-    @Test
-    void testGetDeploymentByProjectIdSuccess() {
-        final var token = oidcClients.getAdminAccessToken();
-
-        final var testTenant = testTenantService.createTenant(true, token);
-
-        final var testStage1 = testStageService.createStage(testTenant.id, true, token);
-        final var testStage2 = testStageService.createStage(testTenant.id, true, token);
-
-        final var testProject1 = testProjectService.createProject(testTenant.id, true, token);
-        final var testVersion1 = testVersionService.createVersion(testProject1.id, true, token);
-        final var testVersion2 = testVersionService.createVersion(testProject1.id, true, token);
-
-        final var testProject2 = testProjectService.createProject(testTenant.id, true, token);
-        final var testVersion3 = testVersionService.createVersion(testProject2.id, true, token);
-
-        final var createdDeployment1 = testDeploymentService
-                .createDeployment(testStage1.id, testVersion1.id, true, token);
-        final var createdDeployment2 = testDeploymentService
-                .createDeployment(testStage2.id, testVersion2.id, true, token);
-        final var createdDeployment3 = testDeploymentService
-                .createDeployment(testStage1.id, testVersion3.id, true, token);
-
-        final var deployments = deploymentResourceClient.getByProjectIdCheck200(testProject1.id, token);
-
-        assertEquals(2, deployments.size);
-
-        final var ids = deployments.list.stream().map(d -> d.id).toList();
-        assertTrue(ids.contains(createdDeployment1.id));
-        assertTrue(ids.contains(createdDeployment2.id));
-        assertFalse(ids.contains(createdDeployment3.id));
     }
 
     @Test
@@ -112,7 +79,7 @@ public class DeploymentResourceTest extends Assertions {
                 .createDeployment(testStage.id, newDeployment, false, token);
 
         assertNotNull(createdDeployment.id);
-        assertEquals(newDeployment.versionId, createdDeployment.version.id);
+        assertEquals(newDeployment.versionId, createdDeployment.versionId);
         assertEquals(DeploymentStatus.CREATING, createdDeployment.status);
 
         eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.DEPLOYMENT_CREATED,

@@ -7,6 +7,8 @@ import java.time.OffsetDateTime;
 
 public class DeploymentProjection extends Projection {
 
+    public Long tenantId;
+    public String tenantName;
     public Long stageId;
     public String stageName;
     public Long versionId;
@@ -20,6 +22,8 @@ public class DeploymentProjection extends Projection {
                                 final String createdBy,
                                 final OffsetDateTime createdAt,
                                 final OffsetDateTime updatedAt,
+                                final @ProjectedFieldName("stage.tenant.id") Long tenantId,
+                                final @ProjectedFieldName("stage.tenant.name") String tenantName,
                                 final @ProjectedFieldName("stage.id") Long stageId,
                                 final @ProjectedFieldName("stage.name") String stageName,
                                 final @ProjectedFieldName("version.id") Long versionId,
@@ -30,6 +34,8 @@ public class DeploymentProjection extends Projection {
                                 final boolean deleted) {
         super(id, createdBy, createdAt, updatedAt, deleted);
 
+        this.tenantId = tenantId;
+        this.tenantName = tenantName;
         this.stageId = stageId;
         this.stageName = stageName;
 

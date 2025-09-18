@@ -16,7 +16,7 @@ public class TestProjectService {
     @Inject
     TestEventService testEventService;
 
-    public Project createProject(final Long tenantId,
+    public ProjectProjection createProject(final Long tenantId,
                                  final NewProject newProject,
                                  final boolean process,
                                  final String token) {
@@ -28,7 +28,7 @@ public class TestProjectService {
         return project;
     }
 
-    public Project createProject(final Long tenantId,
+    public ProjectProjection createProject(final Long tenantId,
                                  final boolean process,
                                  final String token) {
         final var newProject = new NewProject();

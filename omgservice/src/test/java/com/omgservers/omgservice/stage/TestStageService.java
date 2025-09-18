@@ -16,7 +16,7 @@ public class TestStageService {
     @Inject
     TestEventService testEventService;
 
-    public Stage createStage(final Long tenantId,
+    public StageProjection createStage(final Long tenantId,
                              final NewStage newStage,
                              final boolean process,
                              final String token) {
@@ -28,7 +28,7 @@ public class TestStageService {
         return stage;
     }
 
-    public Stage createStage(final Long tenantId,
+    public StageProjection createStage(final Long tenantId,
                              final boolean process,
                              final String token) {
         final var newStage = new NewStage();

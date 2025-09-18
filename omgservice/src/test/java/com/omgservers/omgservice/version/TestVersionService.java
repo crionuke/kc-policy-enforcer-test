@@ -14,7 +14,7 @@ public class TestVersionService {
     @Inject
     TestEventService testEventService;
 
-    public Version createVersion(final Long projectId,
+    public VersionProjection createVersion(final Long projectId,
                                  final NewVersion newVersion,
                                  final boolean process,
                                  final String token) {
@@ -26,7 +26,7 @@ public class TestVersionService {
         return version;
     }
 
-    public Version createVersion(final Long projectId,
+    public VersionProjection createVersion(final Long projectId,
                                  final boolean process,
                                  final String token) {
         final var newVersion = new NewVersion();

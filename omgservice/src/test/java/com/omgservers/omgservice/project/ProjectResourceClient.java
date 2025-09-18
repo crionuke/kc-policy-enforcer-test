@@ -10,13 +10,13 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class ProjectResourceClient {
 
-    public Project createCheck201(final Long tenantId,
+    public ProjectProjection createCheck201(final Long tenantId,
                                   final NewProject newProject,
                                   final String token) {
         return create(tenantId, newProject, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
-                .extract().as(Project.class);
+                .extract().as(ProjectProjection.class);
     }
 
     public ErrorResponse createCheck4xx(final Long tenantId,
@@ -29,11 +29,11 @@ public class ProjectResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Project getByIdCheck200(final Long projectId, final String token) {
+    public ProjectProjection getByIdCheck200(final Long projectId, final String token) {
         return getById(projectId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .extract().as(Project.class);
+                .extract().as(ProjectProjection.class);
     }
 
     public ErrorResponse getByIdCheck4xx(final Long projectId,

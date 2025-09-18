@@ -10,13 +10,13 @@ import static io.restassured.RestAssured.given;
 @ApplicationScoped
 public class VersionResourceClient {
 
-    public Version createCheck201(final Long projectId,
+    public VersionProjection createCheck201(final Long projectId,
                                   final NewVersion newVersion,
                                   final String token) {
         return create(projectId, newVersion, token)
                 .statusCode(201)
                 .contentType(ContentType.JSON)
-                .extract().as(Version.class);
+                .extract().as(VersionProjection.class);
     }
 
     public ErrorResponse createCheck4xx(final Long projectId,
@@ -29,13 +29,13 @@ public class VersionResourceClient {
                 .extract().as(ErrorResponse.class);
     }
 
-    public Version getByIdCheck200(final Long projectId,
+    public VersionProjection getByIdCheck200(final Long projectId,
                                    final Long versionId,
                                    final String token) {
         return getById(projectId, versionId, token)
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .extract().as(Version.class);
+                .extract().as(VersionProjection.class);
     }
 
     public ErrorResponse getByIdCheck4xx(final Long projectId,

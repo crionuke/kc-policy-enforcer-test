@@ -14,7 +14,7 @@ public class TestDeploymentService {
     @Inject
     TestEventService testEventService;
 
-    public Deployment createDeployment(final Long stageId,
+    public DeploymentProjection createDeployment(final Long stageId,
                                        final NewDeployment newDeployment,
                                        final boolean process,
                                        final String token) {
@@ -26,7 +26,7 @@ public class TestDeploymentService {
         return deployment;
     }
 
-    public Deployment createDeployment(final Long stageId,
+    public DeploymentProjection createDeployment(final Long stageId,
                                        final Long versionId,
                                        final boolean process,
                                        final String token) {

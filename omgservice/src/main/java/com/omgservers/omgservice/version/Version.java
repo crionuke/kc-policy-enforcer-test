@@ -91,6 +91,22 @@ public class Version extends Resource {
         }
     }
 
+    public VersionProjection toProjection() {
+        return new VersionProjection(id,
+                createdBy,
+                createdAt,
+                updatedAt,
+                project.tenant.id,
+                project.tenant.name,
+                project.id,
+                project.name,
+                major,
+                minor,
+                patch,
+                status,
+                deleted);
+    }
+
     @Override
     public String toString() {
         return "Version{" +

@@ -54,6 +54,16 @@ public class Tenant extends Resource {
         }
     }
 
+    public TenantProjection toProjection() {
+        return new TenantProjection(id,
+                createdBy,
+                createdAt,
+                updatedAt,
+                name,
+                status,
+                deleted);
+    }
+
     @Override
     public String toString() {
         return "Tenant{" +
