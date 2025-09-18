@@ -58,7 +58,7 @@ public class DeploymentResourceClient {
                 .body(newDeployment)
                 .log().all()
                 .when()
-                .post("/stage/{stageId}/deployment")
+                .post("/stages/{stageId}/deployments")
                 .then()
                 .log().all();
     }
@@ -72,7 +72,7 @@ public class DeploymentResourceClient {
                 .pathParam("id", deploymentId)
                 .log().all()
                 .when()
-                .get("/stage/{stageId}/deployment/{id}")
+                .get("/stages/{stageId}/deployments/{id}")
                 .then()
                 .log().all();
     }
@@ -84,7 +84,7 @@ public class DeploymentResourceClient {
                 .pathParam("projectId", projectId)
                 .log().all()
                 .when()
-                .get("/project/{projectId}/deployment")
+                .get("/projects/{projectId}/deployments")
                 .then()
                 .log().all();
     }

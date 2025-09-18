@@ -28,7 +28,7 @@ public class DeploymentResource {
     }
 
     @GET
-    @Path("/stage/{stageId}/deployment/{id}")
+    @Path("/stages/{stageId}/deployments/{id}")
     public DeploymentProjection getById(@PathParam("stageId") @NotNull final Long stageId,
                               @PathParam("id") @NotNull final Long id) {
         return deploymentService.getById(stageId, id)
@@ -37,7 +37,7 @@ public class DeploymentResource {
 
     @POST
     @ResponseStatus(201)
-    @Path("/stage/{stageId}/deployment")
+    @Path("/stages/{stageId}/deployments")
     @Consumes(MediaType.APPLICATION_JSON)
     public DeploymentProjection create(@PathParam("stageId") @NotNull final Long stageId,
                              @NotNull @Valid final NewDeployment newDeployment) {

@@ -58,7 +58,7 @@ public class VersionResourceClient {
                 .body(newVersion)
                 .log().all()
                 .when()
-                .post("/project/{projectId}/version")
+                .post("/projects/{projectId}/versions")
                 .then()
                 .log().all();
     }
@@ -72,7 +72,7 @@ public class VersionResourceClient {
                 .pathParam("id", versionId)
                 .log().all()
                 .when()
-                .get("/project/{projectId}/version/{id}")
+                .get("/projects/{projectId}/versions/{id}")
                 .then()
                 .log().all();
     }

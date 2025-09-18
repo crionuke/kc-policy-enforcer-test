@@ -15,8 +15,8 @@ fi
 
 echo "$(date) Executing $0 $@" >> .log
 
-echo "$(date) POST ${API_HOSTNAME}/v1/project/${PROJECT_ID}/version" >> .log
-curl -s -S --fail-with-body -X POST "${API_HOSTNAME}/v1/project/${PROJECT_ID}/version" \
+echo "$(date) POST ${API_HOSTNAME}/v1/projects/${PROJECT_ID}/versions" >> .log
+curl -s -S --fail-with-body -X POST "${API_HOSTNAME}/v1/projects/${PROJECT_ID}/versions" \
   -H "Authorization: Bearer $(./echo_token.sh $API_USERNAME $API_PASSWORD)" \
   -H "Content-type: application/json" \
   -d "{ \"major\": \"${MAJOR_VERSION}\", \"minor\": \"${MINOR_VERSION}\", \"patch\": \"${PATCH_VERSION}\" }" | jq .

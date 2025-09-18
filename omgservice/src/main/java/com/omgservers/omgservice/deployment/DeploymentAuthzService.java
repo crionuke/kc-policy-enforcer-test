@@ -40,7 +40,7 @@ public class DeploymentAuthzService {
         return keycloakService.createResource(name,
                 getResourceType(),
                 "Deployment %d".formatted(deploymentId),
-                Set.of("/{ver}/deployment/%d/*".formatted(deploymentId)),
+                Set.of("/{ver}/deployments/%d/*".formatted(deploymentId)),
                 AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString()),

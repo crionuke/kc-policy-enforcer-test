@@ -55,7 +55,7 @@ public class ProjectResourceClient {
                 .body(newProject)
                 .log().all()
                 .when()
-                .post("/tenant/{tenantId}/project")
+                .post("/tenants/{tenantId}/projects")
                 .then();
     }
 
@@ -66,7 +66,7 @@ public class ProjectResourceClient {
                 .pathParam("id", projectId)
                 .log().all()
                 .when()
-                .get("/project/{id}")
+                .get("/projects/{id}")
                 .then();
     }
 }

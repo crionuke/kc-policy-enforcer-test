@@ -38,7 +38,7 @@ public class ProjectAuthzService {
         return keycloakService.createResource(name,
                 getResourceType(),
                 "Project %d".formatted(projectId),
-                Set.of("/{ver}/project/%d/*".formatted(projectId)),
+                Set.of("/{ver}/projects/%d/*".formatted(projectId)),
                 AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));

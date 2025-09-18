@@ -27,7 +27,7 @@ public class TenantResource {
     }
 
     @GET
-    @Path("/tenant/{id}")
+    @Path("/tenants/{id}")
     public TenantProjection getById(@NotNull final Long id) {
         return tenantService.getById(id)
                 .toProjection();

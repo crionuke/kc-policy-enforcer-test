@@ -37,7 +37,7 @@ public class TenantAuthzService {
         return keycloakService.createResource(name,
                 getResourceType(),
                 "Tenant %d".formatted(tenantId),
-                Set.of("/{ver}/tenant/%d/*".formatted(tenantId)),
+                Set.of("/{ver}/tenants/%d/*".formatted(tenantId)),
                 AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }

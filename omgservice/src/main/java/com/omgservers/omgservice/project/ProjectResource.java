@@ -28,7 +28,7 @@ public class ProjectResource {
     }
 
     @GET
-    @Path("/project/{id}")
+    @Path("/projects/{id}")
     public ProjectProjection getById(@NotNull final Long id) {
         return projectService.getById(id)
                 .toProjection();
@@ -36,7 +36,7 @@ public class ProjectResource {
 
     @POST
     @ResponseStatus(201)
-    @Path("/tenant/{tenantId}/project")
+    @Path("/tenants/{tenantId}/projects")
     @Consumes(MediaType.APPLICATION_JSON)
     public ProjectProjection create(@PathParam("tenantId") @NotNull final Long tenantId,
                                     @NotNull @Valid final NewProject newProject) {

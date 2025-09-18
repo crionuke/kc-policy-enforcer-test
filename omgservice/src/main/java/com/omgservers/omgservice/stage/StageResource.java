@@ -28,7 +28,7 @@ public class StageResource {
     }
 
     @GET
-    @Path("/stage/{id}")
+    @Path("/stages/{id}")
     public StageProjection getById(@NotNull final Long id) {
         return stageService.getById(id)
                 .toProjection();
@@ -36,7 +36,7 @@ public class StageResource {
 
     @POST
     @ResponseStatus(201)
-    @Path("/tenant/{tenantId}/stage")
+    @Path("/tenants/{tenantId}/stages")
     @Consumes(MediaType.APPLICATION_JSON)
     public StageProjection create(@PathParam("tenantId") @NotNull final Long tenantId,
                         @NotNull @Valid final NewStage newStage) {

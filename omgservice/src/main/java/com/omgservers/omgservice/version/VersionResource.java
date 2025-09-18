@@ -28,7 +28,7 @@ public class VersionResource {
     }
 
     @GET
-    @Path("/project/{projectId}/version/{id}")
+    @Path("/projects/{projectId}/versions/{id}")
     public VersionProjection getById(@PathParam("projectId") @NotNull final Long projectId,
                                      @PathParam("id") @NotNull final Long id) {
         return versionService.getById(projectId, id)
@@ -38,7 +38,7 @@ public class VersionResource {
     @POST
     @ResponseStatus(201)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/project/{projectId}/version")
+    @Path("/projects/{projectId}/versions")
     public VersionProjection create(@PathParam("projectId") @NotNull final Long projectId,
                                     @NotNull @Valid final NewVersion newVersion) {
         return versionService.create(projectId, newVersion, subClaim.get())

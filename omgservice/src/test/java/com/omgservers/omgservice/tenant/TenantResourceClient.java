@@ -61,7 +61,7 @@ public class TenantResourceClient {
                 .pathParam("id", tenantId)
                 .log().all()
                 .when()
-                .get("/tenant/{id}")
+                .get("/tenants/{id}")
                 .then()
                 .log().all();
     }

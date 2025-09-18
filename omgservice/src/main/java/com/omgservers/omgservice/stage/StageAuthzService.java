@@ -38,7 +38,7 @@ public class StageAuthzService {
         return keycloakService.createResource(name,
                 getResourceType(),
                 "Stage %d".formatted(stageId),
-                Set.of("/{ver}/stage/%d/*".formatted(stageId)),
+                Set.of("/{ver}/stages/%d/*".formatted(stageId)),
                 AuthzScope.ALL.getMethods(),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));

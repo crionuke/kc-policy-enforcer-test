@@ -55,7 +55,7 @@ public class StageResourceClient {
                 .body(newStage)
                 .log().all()
                 .when()
-                .post("/tenant/{tenantId}/stage")
+                .post("/tenants/{tenantId}/stages")
                 .then();
     }
 
@@ -66,7 +66,7 @@ public class StageResourceClient {
                 .pathParam("id", stageId)
                 .log().all()
                 .when()
-                .get("/stage/{id}")
+                .get("/stages/{id}")
                 .then();
     }
 }
