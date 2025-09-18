@@ -44,7 +44,10 @@ quarkus:
     policy-enforcer:
       enable: true
       lazy-load-paths: true
-      http-method-as-scope: true
+      http-method-as-scope: false
+      path-cache:
+        lifespan: 30000
+        max-entries: 1000
   oidc:
     auth-server-url: ${AUTH_SERVER_URL}/realms/${AUTH_REALM}
     client-id: ${AUTH_CLIENT_ID}

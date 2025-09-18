@@ -41,7 +41,7 @@ public class DeploymentAuthzService {
                 getResourceType(),
                 "Deployment %d".formatted(deploymentId),
                 Set.of("/{ver}/deployments/%d/*".formatted(deploymentId)),
-                AuthzScope.ALL.getMethods(),
+                Set.of(AuthzScope.VIEW.getName(), AuthzScope.MANAGE.getName(), AuthzScope.ADMIN.getName()),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString()),
                         DEPLOYMENT_ID_ATTRIBUTE, List.of(deploymentId.toString())));
@@ -55,7 +55,7 @@ public class DeploymentAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(deploymentId);
-        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.VIEW.getName()), policies);
     }
 
     public String getManagePermissionName(final Long deploymentId) {
@@ -66,7 +66,7 @@ public class DeploymentAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(deploymentId);
-        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.MANAGE.getName()), policies);
     }
 
     public String getAdminPermissionName(final Long deploymentId) {
@@ -77,6 +77,6 @@ public class DeploymentAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(deploymentId);
-        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.ADMIN.getName()), policies);
     }
 }

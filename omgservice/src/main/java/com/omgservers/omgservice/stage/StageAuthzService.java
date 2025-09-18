@@ -39,7 +39,7 @@ public class StageAuthzService {
                 getResourceType(),
                 "Stage %d".formatted(stageId),
                 Set.of("/{ver}/stages/%d/*".formatted(stageId)),
-                AuthzScope.ALL.getMethods(),
+                Set.of(AuthzScope.VIEW.getName(), AuthzScope.MANAGE.getName(), AuthzScope.ADMIN.getName()),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));
     }
@@ -109,7 +109,7 @@ public class StageAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(stageId);
-        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.VIEW.getName()), policies);
     }
 
     public String getManagePermissionName(final Long stageId) {
@@ -120,7 +120,7 @@ public class StageAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(stageId);
-        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.MANAGE.getName()), policies);
     }
 
     public String getAdminPermissionName(final Long stageId) {
@@ -131,6 +131,6 @@ public class StageAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(stageId);
-        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.ADMIN.getName()), policies);
     }
 }

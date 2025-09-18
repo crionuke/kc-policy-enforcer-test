@@ -33,6 +33,12 @@ public class TenantResource {
                 .toProjection();
     }
 
+    @GET
+    @Path("/tenants/{id}/permissions")
+    public String getPermissionsById(@NotNull final Long id) {
+        return "{}";
+    }
+
     @POST
     @Path("/my/tenants")
     @ResponseStatus(201)

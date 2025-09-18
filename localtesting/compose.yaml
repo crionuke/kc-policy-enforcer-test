@@ -1,6 +1,20 @@
 name: omgservers
 
 services:
+  gateway:
+    image: "envoyproxy/envoy:v1.28-latest"
+    container_name: "gateway"
+    command: "-c /etc/envoy/gateway.yaml"
+    restart: unless-stopped
+    profiles:
+      - localtesting
+      - standalone
+    ports:
+      - "8000:8080"
+    networks:
+      - omgservers
+    volumes:
+      - ./gateway.yaml:/etc/envoy/gateway.yaml:ro
   postgres:
     image: "postgres:17.6"
     container_name: "postgres"
@@ -49,7 +63,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
     ports:
-      - "8000:8080"
+      - "8001:8080"
     networks:
       - omgservers
     volumes:
@@ -68,7 +82,7 @@ services:
       AUTH_CLIENT_ID: omgservice
       AUTH_CLIENT_SECRET: omgservice
     ports:
-      - "8001:8080"
+      - "8002:8080"
     networks:
       - omgservers
 networks:

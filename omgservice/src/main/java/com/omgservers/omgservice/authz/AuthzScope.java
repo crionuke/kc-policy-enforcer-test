@@ -1,21 +1,18 @@
 package com.omgservers.omgservice.authz;
 
-import java.util.Set;
-
 public enum AuthzScope {
 
-    VIEW(Set.of("GET")),
-    MANAGE(Set.of("GET", "PATCH", "PUT", "POST")),
-    ADMIN(Set.of("DELETE")),
-    ALL(Set.of("GET", "PATCH", "PUT", "POST", "DELETE"));
+    VIEW("scope:omg:view"),
+    MANAGE("scope:omg:manage"),
+    ADMIN("scope:omg:admin");
 
-    final Set<String> methods;
+    final String name;
 
-    AuthzScope(Set<String> methods) {
-        this.methods = methods;
+    AuthzScope(final String name) {
+        this.name = name;
     }
 
-    public Set<String> getMethods() {
-        return methods;
+    public String getName() {
+        return name;
     }
 }

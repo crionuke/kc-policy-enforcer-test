@@ -39,7 +39,7 @@ public class ProjectAuthzService {
                 getResourceType(),
                 "Project %d".formatted(projectId),
                 Set.of("/{ver}/projects/%d/*".formatted(projectId)),
-                AuthzScope.ALL.getMethods(),
+                Set.of(AuthzScope.VIEW.getName(), AuthzScope.MANAGE.getName(), AuthzScope.ADMIN.getName()),
                 Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
                         PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
     }
@@ -109,7 +109,7 @@ public class ProjectAuthzService {
                                                               final ResourceRepresentation resource,
                                                               final Set<PolicyRepresentation> policies) {
         final var name = getViewPermissionName(projectId);
-        return keycloakService.createPermission(name, resource, AuthzScope.VIEW.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.VIEW.getName()), policies);
     }
 
     public String getManagePermissionName(final Long projectId) {
@@ -120,7 +120,7 @@ public class ProjectAuthzService {
                                                                 final ResourceRepresentation resource,
                                                                 final Set<PolicyRepresentation> policies) {
         final var name = getManagePermissionName(projectId);
-        return keycloakService.createPermission(name, resource, AuthzScope.MANAGE.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.MANAGE.getName()), policies);
     }
 
     public String getAdminPermissionName(final Long projectId) {
@@ -131,6 +131,6 @@ public class ProjectAuthzService {
                                                                final ResourceRepresentation resource,
                                                                final Set<PolicyRepresentation> policies) {
         final var name = getAdminPermissionName(projectId);
-        return keycloakService.createPermission(name, resource, AuthzScope.ADMIN.getMethods(), policies);
+        return keycloakService.createPermission(name, resource, Set.of(AuthzScope.ADMIN.getName()), policies);
     }
 }
