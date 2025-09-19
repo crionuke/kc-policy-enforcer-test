@@ -35,21 +35,6 @@ quarkus:
               method: POST
               scopes:
                 - scope:omg:manage
-        # Stage
-        stage-resource:
-          path: /{ver}/stages/{id}
-          methods:
-            get:
-              method: GET
-              scopes:
-                - scope:omg:view
-        tenant-stages:
-          path: /{ver}/tenants/{tenantId}/stages
-          methods:
-            get:
-              method: POST
-              scopes:
-                - scope:omg:manage
         # Version
         version-resource:
           path: /{ver}/projects/{projectId}/versions/{id}
@@ -60,6 +45,36 @@ quarkus:
                 - scope:omg:view
         project-versions:
           path: /{ver}/projects/{projectId}/versions
+          methods:
+            get:
+              method: POST
+              scopes:
+                - scope:omg:manage
+        # Registry
+        registry-resource:
+          path: /{ver}/projects/{projectId}/registries/{id}
+          methods:
+            get:
+              method: GET
+              scopes:
+                - scope:omg:view
+        project-registries:
+          path: /{ver}/projects/{projectId}/registries
+          methods:
+            get:
+              method: POST
+              scopes:
+                - scope:omg:manage
+        # Stage
+        stage-resource:
+          path: /{ver}/stages/{id}
+          methods:
+            get:
+              method: GET
+              scopes:
+                - scope:omg:view
+        tenant-stages:
+          path: /{ver}/tenants/{tenantId}/stages
           methods:
             get:
               method: POST

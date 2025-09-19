@@ -39,7 +39,7 @@ public class VersionService {
         version.config.version = VersionConfigVersion.V1;
         version.persist();
 
-        eventService.create(EventQualifier.VERSION_CREATED, version.id);
+        eventService.create(EventQualifier.VERSION_INSERTED, version.id);
 
         return version;
     }

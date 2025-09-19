@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class EventHandlers {
-    static final Logger log = LoggerFactory.getLogger(EventHandlers.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(EventHandlers.class);
 
     final Map<EventQualifier, EventHandler> handlers;
 
@@ -22,16 +22,17 @@ public class EventHandlers {
             handlers.put(qualifier, handler);
         });
 
-        log.info("Registered event handlers, {}", handlers.keySet());
+        LOGGER.info("Registered event handlers, {}", handlers.keySet());
     }
 
     public void handle(final Event event) {
         final var qualifier = event.qualifier;
         final var handler = handlers.get(qualifier);
         if (Objects.nonNull(handler)) {
+            LOGGER.info("Handling {} ", qualifier);
             handler.handle(event.resourceId);
         } else {
-            log.error("No handler found for {}", qualifier);
+            LOGGER.error("No handler found for {}", qualifier);
         }
     }
 }

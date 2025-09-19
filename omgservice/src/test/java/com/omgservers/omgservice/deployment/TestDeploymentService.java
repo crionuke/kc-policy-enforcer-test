@@ -20,7 +20,7 @@ public class TestDeploymentService {
                                        final String token) {
         final var deployment = deploymentResourceClient.createCheck201(stageId, newDeployment, token);
         if (process) {
-            testEventService.process(EventQualifier.DEPLOYMENT_CREATED, deployment.id);
+            testEventService.process(EventQualifier.DEPLOYMENT_INSERTED, deployment.id);
         }
 
         return deployment;

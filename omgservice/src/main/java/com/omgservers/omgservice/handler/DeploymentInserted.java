@@ -1,5 +1,6 @@
-package com.omgservers.omgservice.deployment;
+package com.omgservers.omgservice.handler;
 
+import com.omgservers.omgservice.deployment.Deployment;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,27 +9,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
-public class DeploymentCreatedHandler implements EventHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentCreatedHandler.class);
+public class DeploymentInserted implements EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentInserted.class);
 
-    final DeploymentCreatedHandler thisHandler;
+    final DeploymentInserted thisHandler;
 
-    public DeploymentCreatedHandler(final DeploymentCreatedHandler thisHandler) {
+    public DeploymentInserted(final DeploymentInserted thisHandler) {
         this.thisHandler = thisHandler;
     }
 
     @Override
     public EventQualifier getQualifier() {
-        return EventQualifier.DEPLOYMENT_CREATED;
+        return EventQualifier.DEPLOYMENT_INSERTED;
     }
 
     @Override
     public void handle(final Long resourceId) {
         final var deployment = Deployment.findByIdRequired(resourceId);
-        LOGGER.info("Creating deployment {}", deployment);
+        LOGGER.info("Creating {}", deployment);
 
         thisHandler.finish(resourceId);
-        LOGGER.info("Deployment {} created successfully", deployment);
+        LOGGER.info("{} created successfully", deployment);
     }
 
     @Transactional

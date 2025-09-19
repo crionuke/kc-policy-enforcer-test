@@ -5,7 +5,7 @@ import com.omgservers.omgservice.authz.AuthzEntity;
 public class ProjectConfig {
 
     public ProjectConfigVersion version;
-
+    public NewProject representation;
     public ProjectConfig.Authz authz;
 
     public static class Authz {

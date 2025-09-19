@@ -74,7 +74,7 @@ public class VersionResourceTest extends Assertions {
         assertEquals(newVersion.patch, createdVersion.patch);
         assertEquals(VersionStatus.CREATING, createdVersion.status);
 
-        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.VERSION_CREATED,
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.VERSION_INSERTED,
                 createdVersion.id,
                 token);
     }

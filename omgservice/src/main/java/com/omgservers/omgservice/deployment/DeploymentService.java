@@ -43,7 +43,7 @@ public class DeploymentService {
         deployment.config.version = DeploymentConfigVersion.V1;
         deployment.persist();
 
-        eventService.create(EventQualifier.DEPLOYMENT_CREATED, deployment.id);
+        eventService.create(EventQualifier.DEPLOYMENT_INSERTED, deployment.id);
 
         return deployment;
     }

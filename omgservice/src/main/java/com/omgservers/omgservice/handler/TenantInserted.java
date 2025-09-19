@@ -1,9 +1,12 @@
-package com.omgservers.omgservice.tenant;
+package com.omgservers.omgservice.handler;
 
 import com.omgservers.omgservice.authz.AuthzEntity;
 import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
+import com.omgservers.omgservice.tenant.Tenant;
+import com.omgservers.omgservice.tenant.TenantAuthzService;
+import com.omgservers.omgservice.tenant.TenantConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -12,16 +15,16 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 
 @ApplicationScoped
-public class TenantCreatedHandler implements EventHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TenantCreatedHandler.class);
+public class TenantInserted implements EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantInserted.class);
 
     final TenantAuthzService tenantAuthzService;
-    final TenantCreatedHandler thisHandler;
+    final TenantInserted thisHandler;
     final KeycloakService keycloakService;
 
-    public TenantCreatedHandler(final TenantAuthzService tenantAuthzService,
-                                final TenantCreatedHandler thisHandler,
-                                final KeycloakService keycloakService) {
+    public TenantInserted(final TenantAuthzService tenantAuthzService,
+                          final TenantInserted thisHandler,
+                          final KeycloakService keycloakService) {
         this.tenantAuthzService = tenantAuthzService;
         this.keycloakService = keycloakService;
         this.thisHandler = thisHandler;
@@ -29,14 +32,14 @@ public class TenantCreatedHandler implements EventHandler {
 
     @Override
     public EventQualifier getQualifier() {
-        return EventQualifier.TENANT_CREATED;
+        return EventQualifier.TENANT_INSERTED;
     }
 
     @Override
     public void handle(final Long resourceId) {
         final var tenant = Tenant.findByIdRequired(resourceId);
 
-        LOGGER.info("Creating tenant {}", tenant);
+        LOGGER.info("Creating {}", tenant);
 
         final var createdBy = tenant.createdBy;
 
@@ -80,7 +83,7 @@ public class TenantCreatedHandler implements EventHandler {
 
         thisHandler.finish(resourceId, authz);
 
-        LOGGER.info("Tenant {} created successfully", tenant);
+        LOGGER.info("{} created successfully", tenant);
     }
 
     @Transactional

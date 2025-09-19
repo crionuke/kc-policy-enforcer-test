@@ -20,7 +20,7 @@ public class TestVersionService {
                                  final String token) {
         final var version = versionResourceClient.createCheck201(projectId, newVersion, token);
         if (process) {
-            testEventService.process(EventQualifier.VERSION_CREATED, version.id);
+            testEventService.process(EventQualifier.VERSION_INSERTED, version.id);
         }
 
         return version;

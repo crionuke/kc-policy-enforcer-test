@@ -15,13 +15,13 @@ quarkus:
       url: jdbc:postgresql://localhost:5432/omgservers?current_schema=omgservice
   keycloak:
     admin-client:
-      server-url: http://localhost:8000
+      server-url: http://localhost:8001
       realm: omgservers
       client-id: omgservice
       client-secret: omgservice
       grant-type: CLIENT_CREDENTIALS
   oidc:
-    auth-server-url: http://localhost:8000/realms/omgservers
+    auth-server-url: http://localhost:8001/realms/omgservers
     client-id: omgservice
     credentials:
       secret: omgservice

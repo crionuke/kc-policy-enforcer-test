@@ -1,9 +1,13 @@
-package com.omgservers.omgservice.stage;
+package com.omgservers.omgservice.handler;
 
 import com.omgservers.omgservice.authz.AuthzEntity;
 import com.omgservers.omgservice.authz.KeycloakService;
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
+import com.omgservers.omgservice.stage.Stage;
+import com.omgservers.omgservice.stage.StageAuthzService;
+import com.omgservers.omgservice.stage.StageConfig;
+import com.omgservers.omgservice.stage.StageService;
 import com.omgservers.omgservice.tenant.TenantAuthzService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -13,20 +17,20 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 
 @ApplicationScoped
-public class StageCreatedHandler implements EventHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StageCreatedHandler.class);
+public class StageInserted implements EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StageInserted.class);
 
     final TenantAuthzService tenantAuthzService;
     final StageAuthzService stageAuthzService;
-    final StageCreatedHandler thisHandler;
+    final StageInserted thisHandler;
     final KeycloakService keycloakService;
     final StageService stageService;
 
-    public StageCreatedHandler(final TenantAuthzService tenantAuthzService,
-                               final StageAuthzService stageAuthzService,
-                               final StageCreatedHandler thisHandler,
-                               final KeycloakService keycloakService,
-                               final StageService stageService) {
+    public StageInserted(final TenantAuthzService tenantAuthzService,
+                         final StageAuthzService stageAuthzService,
+                         final StageInserted thisHandler,
+                         final KeycloakService keycloakService,
+                         final StageService stageService) {
         this.tenantAuthzService = tenantAuthzService;
         this.stageAuthzService = stageAuthzService;
         this.keycloakService = keycloakService;
@@ -36,14 +40,14 @@ public class StageCreatedHandler implements EventHandler {
 
     @Override
     public EventQualifier getQualifier() {
-        return EventQualifier.STAGE_CREATED;
+        return EventQualifier.STAGE_INSERTED;
     }
 
     @Override
     public void handle(final Long resourceId) {
         final var stage = Stage.findByIdRequired(resourceId);
 
-        LOGGER.info("Creating stage {}", stage);
+        LOGGER.info("Creating {}", stage);
 
         final var tenantId = stage.tenant.id;
         final var createdBy = stage.createdBy;
@@ -97,7 +101,7 @@ public class StageCreatedHandler implements EventHandler {
 
         thisHandler.finish(resourceId, authz);
 
-        LOGGER.info("Stage {} created successfully", stage);
+        LOGGER.info("{} created successfully", stage);
     }
 
     @Transactional

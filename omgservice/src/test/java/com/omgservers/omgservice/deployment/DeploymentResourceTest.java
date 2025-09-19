@@ -82,7 +82,7 @@ public class DeploymentResourceTest extends Assertions {
         assertEquals(newDeployment.versionId, createdDeployment.versionId);
         assertEquals(DeploymentStatus.CREATING, createdDeployment.status);
 
-        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.DEPLOYMENT_CREATED,
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.DEPLOYMENT_INSERTED,
                 createdDeployment.id,
                 token);
     }

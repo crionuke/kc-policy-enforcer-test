@@ -1,34 +1,35 @@
-package com.omgservers.omgservice.version;
+package com.omgservers.omgservice.handler;
 
 import com.omgservers.omgservice.event.EventHandler;
 import com.omgservers.omgservice.event.EventQualifier;
+import com.omgservers.omgservice.version.Version;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
-public class VersionCreatedHandler implements EventHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VersionCreatedHandler.class);
+public class VersionInserted implements EventHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VersionInserted.class);
 
-    final VersionCreatedHandler thisHandler;
+    final VersionInserted thisHandler;
 
-    public VersionCreatedHandler(final VersionCreatedHandler thisHandler) {
+    public VersionInserted(final VersionInserted thisHandler) {
         this.thisHandler = thisHandler;
     }
 
     @Override
     public EventQualifier getQualifier() {
-        return EventQualifier.VERSION_CREATED;
+        return EventQualifier.VERSION_INSERTED;
     }
 
     @Override
     public void handle(final Long resourceId) {
         final var version = Version.findByIdRequired(resourceId);
-        LOGGER.info("Creating version {}", version);
+        LOGGER.info("Creating {}", version);
 
         thisHandler.finish(resourceId);
-        LOGGER.info("Version {} created successfully", version);
+        LOGGER.info("{} created successfully", version);
     }
 
     @Transactional

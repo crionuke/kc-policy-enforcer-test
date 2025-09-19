@@ -35,7 +35,7 @@ public class StageService {
         stage.config.version = StageConfigVersion.V1;
         stage.persist();
 
-        eventService.create(EventQualifier.STAGE_CREATED, stage.id);
+        eventService.create(EventQualifier.STAGE_INSERTED, stage.id);
 
         return stage;
     }

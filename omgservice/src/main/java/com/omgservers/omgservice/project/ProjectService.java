@@ -5,10 +5,13 @@ import com.omgservers.omgservice.event.EventService;
 import com.omgservers.omgservice.tenant.Tenant;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Transactional
 @ApplicationScoped
 public class ProjectService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
     final EventService eventService;
 
@@ -33,9 +36,10 @@ public class ProjectService {
         project.status = ProjectStatus.CREATING;
         project.config = new ProjectConfig();
         project.config.version = ProjectConfigVersion.V1;
+        project.config.representation = newProject;
         project.persist();
 
-        eventService.create(EventQualifier.PROJECT_CREATED, project.id);
+        eventService.create(EventQualifier.PROJECT_INSERTED, project.id);
 
         return project;
     }

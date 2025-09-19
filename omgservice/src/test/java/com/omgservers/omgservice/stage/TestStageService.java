@@ -22,7 +22,7 @@ public class TestStageService {
                              final String token) {
         final var stage = stageResourceClient.createCheck201(tenantId, newStage, token);
         if (process) {
-            testEventService.process(EventQualifier.STAGE_CREATED, stage.id);
+            testEventService.process(EventQualifier.STAGE_INSERTED, stage.id);
         }
 
         return stage;

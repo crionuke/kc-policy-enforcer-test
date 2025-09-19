@@ -29,7 +29,7 @@ public class TenantService {
         tenant.config.version = TenantConfigVersion.V1;
         tenant.persist();
 
-        eventService.create(EventQualifier.TENANT_CREATED, tenant.id);
+        eventService.create(EventQualifier.TENANT_INSERTED, tenant.id);
 
         return tenant;
     }

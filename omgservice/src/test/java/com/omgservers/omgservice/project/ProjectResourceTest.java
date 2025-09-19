@@ -59,7 +59,7 @@ public class ProjectResourceTest extends Assertions {
         assertEquals(newProject.name, createdProject.name);
         assertEquals(ProjectStatus.CREATING, createdProject.status);
 
-        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.PROJECT_CREATED,
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.PROJECT_INSERTED,
                 createdProject.id,
                 token);
     }

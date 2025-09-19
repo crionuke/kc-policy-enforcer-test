@@ -21,7 +21,7 @@ public class TestTenantService {
                                          final String token) {
         final var createdTenant = tenantResourceClient.createCheck201(newTenant, token);
         if (process) {
-            testEventService.process(EventQualifier.TENANT_CREATED, createdTenant.id);
+            testEventService.process(EventQualifier.TENANT_INSERTED, createdTenant.id);
         }
 
         return createdTenant;

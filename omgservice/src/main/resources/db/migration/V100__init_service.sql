@@ -51,6 +51,20 @@ create table if not exists omgservice_version (
     deleted boolean not null
 );
 
+create table if not exists omgservice_registry (
+    id bigint primary key default nextval('omgservice_id_sequence'),
+    revision bigint not null,
+    created_by text not null,
+    created_at timestamp with time zone not null,
+    updated_at timestamp with time zone not null,
+    project_id bigint not null references omgservice_project(id) on delete restrict on update restrict,
+    name text not null,
+    status text not null,
+    config jsonb not null,
+    deleted boolean not null,
+    unique(name)
+);
+
 create table if not exists omgservice_stage (
     id bigint primary key default nextval('omgservice_id_sequence'),
     revision bigint not null,

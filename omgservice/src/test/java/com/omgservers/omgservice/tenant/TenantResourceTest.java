@@ -54,7 +54,7 @@ public class TenantResourceTest extends Assertions {
         assertEquals(newTenant.name, createdTenant.name);
         assertEquals(TenantStatus.CREATING, createdTenant.status);
 
-        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.TENANT_CREATED,
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.TENANT_INSERTED,
                 createdTenant.id,
                 token);
     }

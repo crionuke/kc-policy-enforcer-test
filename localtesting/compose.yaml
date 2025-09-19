@@ -1,20 +1,29 @@
+# localhost:8001 - keycloak
+# localhost:8002 - omgservice
+# localhost:5432 - postgres
+# localhost:6379 - redis
+# gateway:
+# - localhost:8101 - keycloak
+# - localhost:8102 - omgservice
+
 name: omgservers
 
 services:
   gateway:
     image: "envoyproxy/envoy:v1.28-latest"
     container_name: "gateway"
-    command: "-c /etc/envoy/gateway.yaml"
+    command: "-c /etc/envoy/gateway_config.yaml"
     restart: unless-stopped
     profiles:
       - localtesting
       - standalone
     ports:
-      - "8000:8080"
+      - "8101:8001"
+      - "8102:8002"
     networks:
       - omgservers
     volumes:
-      - ./gateway.yaml:/etc/envoy/gateway.yaml:ro
+      - ./gateway_config.yaml:/etc/envoy/gateway_config.yaml:ro
   postgres:
     image: "postgres:17.6"
     container_name: "postgres"
@@ -48,7 +57,7 @@ services:
     image: "quay.io/keycloak/keycloak:26.3"
     container_name: "keycloak"
     restart: unless-stopped
-    entrypoint: /opt/keycloak/bin/kc.sh start-dev --import-realm
+    entrypoint: /opt/keycloak/bin/kc.sh start-dev --import-realm --features="docker"
     profiles:
       - localtesting
       - standalone
@@ -68,6 +77,18 @@ services:
       - omgservers
     volumes:
       - ./omgservers-realm.json:/opt/keycloak/data/import/omgservers-realm.json:r
+  registry:
+    image: "registry:2.8"
+    container_name: "registry"
+    command: "/etc/docker/registry/registry_config.yaml"
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - omgservers
+    volumes:
+      - ./registry_config.yaml:/etc/docker/registry/registry_config.yaml:ro
+      - ./jwt_issuer_cert.pem:/root/certs/bundle/jwt_issuer_cert.pem
   omgservice:
     image: "omgservers/omgservice:${OMGSERVERS_VERSION}"
     container_name: "omgservice"

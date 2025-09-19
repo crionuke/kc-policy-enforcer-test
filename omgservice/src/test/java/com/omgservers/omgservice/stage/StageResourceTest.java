@@ -61,7 +61,7 @@ public class StageResourceTest extends Assertions {
         assertEquals(newStage.name, createdStage.name);
         assertEquals(StageStatus.CREATING, createdStage.status);
 
-        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.STAGE_CREATED,
+        eventResourceClient.getByQualifierAndResourceIdCheck200(EventQualifier.STAGE_INSERTED,
                 createdStage.id,
                 token);
     }

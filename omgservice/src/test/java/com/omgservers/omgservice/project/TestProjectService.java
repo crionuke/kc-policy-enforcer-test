@@ -22,7 +22,7 @@ public class TestProjectService {
                                  final String token) {
         final var project = projectResourceClient.createCheck201(tenantId, newProject, token);
         if (process) {
-            testEventService.process(EventQualifier.PROJECT_CREATED, project.id);
+            testEventService.process(EventQualifier.PROJECT_INSERTED, project.id);
         }
 
         return project;
