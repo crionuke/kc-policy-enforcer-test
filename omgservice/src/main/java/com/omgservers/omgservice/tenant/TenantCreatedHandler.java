@@ -15,15 +15,15 @@ import java.util.Set;
 public class TenantCreatedHandler implements EventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TenantCreatedHandler.class);
 
+    final TenantAuthzService tenantAuthzService;
     final TenantCreatedHandler thisHandler;
-    final TenantAuthzService authzService;
     final KeycloakService keycloakService;
 
-    public TenantCreatedHandler(final TenantCreatedHandler thisHandler,
-                                final TenantAuthzService authzService,
+    public TenantCreatedHandler(final TenantAuthzService tenantAuthzService,
+                                final TenantCreatedHandler thisHandler,
                                 final KeycloakService keycloakService) {
+        this.tenantAuthzService = tenantAuthzService;
         this.keycloakService = keycloakService;
-        this.authzService = authzService;
         this.thisHandler = thisHandler;
     }
 
@@ -42,39 +42,40 @@ public class TenantCreatedHandler implements EventHandler {
 
         final var authz = new TenantConfig.Authz();
 
-        final var viewersGroup = authzService.createViewersGroup(resourceId);
+        final var viewersGroup = tenantAuthzService.createViewersGroup(resourceId);
         authz.viewersGroup = new AuthzEntity(viewersGroup.getId(), viewersGroup.getName());
 
-        final var managersGroup = authzService.createManagersGroup(resourceId);
+        final var managersGroup = tenantAuthzService.createManagersGroup(resourceId);
         authz.managersGroup = new AuthzEntity(managersGroup.getId(), managersGroup.getName());
 
-        final var adminsGroup = authzService.createAdminsGroup(resourceId);
+        final var adminsGroup = tenantAuthzService.createAdminsGroup(resourceId);
         authz.adminsGroup = new AuthzEntity(adminsGroup.getId(), adminsGroup.getName());
 
         keycloakService.joinGroup(createdBy, adminsGroup);
 
-        final var authzResource = authzService.createResource(resourceId);
+        final var authzResource = tenantAuthzService.createResource(resourceId);
         authz.authzResource = new AuthzEntity(authzResource.getId(), authzResource.getName());
 
-        final var viewersPolicy = authzService.createViewersPolicy(resourceId, viewersGroup);
+        final var viewersPolicy = tenantAuthzService.createViewersPolicy(resourceId, viewersGroup);
         authz.viewersPolicy = new AuthzEntity(viewersPolicy.getId(), viewersPolicy.getName());
 
-        final var managersPolicy = authzService.createManagersPolicy(resourceId, managersGroup);
+        final var managersPolicy = tenantAuthzService.createManagersPolicy(resourceId, managersGroup);
         authz.managersPolicy = new AuthzEntity(managersPolicy.getId(), managersPolicy.getName());
 
-        final var adminsPolicy = authzService.createAdminsPolicy(resourceId, adminsGroup);
+        final var adminsPolicy = tenantAuthzService.createAdminsPolicy(resourceId, adminsGroup);
         authz.adminsPolicy = new AuthzEntity(adminsPolicy.getId(), adminsPolicy.getName());
 
         final var viewPolicies = Set.of(viewersPolicy, managersPolicy, adminsPolicy);
-        final var viewPermission = authzService.createViewPermission(resourceId, authzResource, viewPolicies);
+        final var viewPermission = tenantAuthzService.createViewPermission(resourceId, authzResource, viewPolicies);
         authz.viewPermission = new AuthzEntity(viewPermission.getId(), viewPermission.getName());
 
         final var managePolicies = Set.of(managersPolicy, adminsPolicy);
-        final var managePermission = authzService.createManagePermission(resourceId, authzResource, managePolicies);
+        final var managePermission =
+                tenantAuthzService.createManagePermission(resourceId, authzResource, managePolicies);
         authz.managePermission = new AuthzEntity(managePermission.getId(), managePermission.getName());
 
         final var adminPolicies = Set.of(adminsPolicy);
-        final var adminPermission = authzService.createAdminPermission(resourceId, authzResource, adminPolicies);
+        final var adminPermission = tenantAuthzService.createAdminPermission(resourceId, authzResource, adminPolicies);
         authz.adminPermission = new AuthzEntity(adminPermission.getId(), adminPermission.getName());
 
         thisHandler.finish(resourceId, authz);

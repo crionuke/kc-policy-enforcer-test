@@ -48,27 +48,30 @@ public class StageAuthzService {
         return "group:omg:stage:%d:viewers".formatted(stageId);
     }
 
-    public GroupRepresentation createViewersGroup(final Long stageId) {
+    public GroupRepresentation createViewersGroup(final Long tenantId, final Long stageId) {
         final var name = getViewersGroupName(stageId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));
     }
 
     public String getManagersGroupName(final Long stageId) {
         return "group:omg:stage:%d:managers".formatted(stageId);
     }
 
-    public GroupRepresentation createManagersGroup(final Long stagId) {
-        final var name = getManagersGroupName(stagId);
-        return keycloakService.createGroup(name);
+    public GroupRepresentation createManagersGroup(final Long tenantId, final Long stageId) {
+        final var name = getManagersGroupName(stageId);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));
     }
 
     public String getAdminsGroupName(final Long stageId) {
         return "group:omg:stage:%d:admins".formatted(stageId);
     }
 
-    public GroupRepresentation createAdminsGroup(final Long stageId) {
+    public GroupRepresentation createAdminsGroup(final Long tenantId, final Long stageId) {
         final var name = getAdminsGroupName(stageId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                STAGE_ID_ATTRIBUTE, List.of(stageId.toString())));
     }
 
     public String getViewersPolicyName(final Long stageId) {

@@ -50,13 +50,13 @@ public class StageCreatedHandler implements EventHandler {
 
         final var authz = new StageConfig.Authz();
 
-        final var viewersGroup = stageAuthzService.createViewersGroup(resourceId);
+        final var viewersGroup = stageAuthzService.createViewersGroup(tenantId, resourceId);
         authz.viewersGroup = new AuthzEntity(viewersGroup.getId(), viewersGroup.getName());
 
-        final var managersGroup = stageAuthzService.createManagersGroup(resourceId);
+        final var managersGroup = stageAuthzService.createManagersGroup(tenantId, resourceId);
         authz.managersGroup = new AuthzEntity(managersGroup.getId(), managersGroup.getName());
 
-        final var adminsGroup = stageAuthzService.createAdminsGroup(resourceId);
+        final var adminsGroup = stageAuthzService.createAdminsGroup(tenantId, resourceId);
         authz.adminsGroup = new AuthzEntity(adminsGroup.getId(), adminsGroup.getName());
 
         keycloakService.joinGroup(createdBy, adminsGroup);

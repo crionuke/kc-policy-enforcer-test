@@ -48,27 +48,30 @@ public class ProjectAuthzService {
         return "group:omg:project:%d:viewers".formatted(projectId);
     }
 
-    public GroupRepresentation createViewersGroup(final Long projectId) {
+    public GroupRepresentation createViewersGroup(final Long tenantId, final Long projectId) {
         final var name = getViewersGroupName(projectId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
     }
 
     public String getManagersGroupName(final Long projectId) {
         return "group:omg:project:%d:managers".formatted(projectId);
     }
 
-    public GroupRepresentation createManagersGroup(final Long projectId) {
+    public GroupRepresentation createManagersGroup(final Long tenantId, final Long projectId) {
         final var name = getManagersGroupName(projectId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
     }
 
     public String getAdminsGroupName(final Long projectId) {
         return "group:omg:project:%d:admins".formatted(projectId);
     }
 
-    public GroupRepresentation createAdminsGroup(final Long projectId) {
+    public GroupRepresentation createAdminsGroup(final Long tenantId, final Long projectId) {
         final var name = getAdminsGroupName(projectId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString()),
+                PROJECT_ID_ATTRIBUTE, List.of(projectId.toString())));
     }
 
     public String getViewersPolicyName(final Long projectId) {

@@ -39,7 +39,8 @@ public class KeycloakService {
         this.keycloak = keycloak;
     }
 
-    public GroupRepresentation createGroup(final String name) {
+    public GroupRepresentation createGroup(final String name,
+                                           final Map<String, List<String>> attributes) {
         final var resource = getGroupsResource();
 
         final var groups = resource.groups(name, 0, 1);
@@ -50,6 +51,7 @@ public class KeycloakService {
 
         final var representation = new GroupRepresentation();
         representation.setName(name);
+        representation.setAttributes(attributes);
 
         try (final var response = resource.add(representation)) {
             if (response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {

@@ -48,7 +48,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createViewersGroup(final Long tenantId) {
         final var name = getViewersGroupName(tenantId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }
 
     public String getManagersGroupName(final Long tenantId) {
@@ -57,7 +57,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createManagersGroup(final Long tenantId) {
         final var name = getManagersGroupName(tenantId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }
 
     public String getAdminsGroupName(final Long tenantId) {
@@ -66,7 +66,7 @@ public class TenantAuthzService {
 
     public GroupRepresentation createAdminsGroup(final Long tenantId) {
         final var name = getAdminsGroupName(tenantId);
-        return keycloakService.createGroup(name);
+        return keycloakService.createGroup(name, Map.of(TENANT_ID_ATTRIBUTE, List.of(tenantId.toString())));
     }
 
     public String getViewersPolicyName(final Long tenantId) {

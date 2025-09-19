@@ -50,13 +50,13 @@ public class ProjectCreatedHandler implements EventHandler {
 
         final var authz = new ProjectConfig.Authz();
 
-        final var viewersGroup = projectAuthzService.createViewersGroup(resourceId);
+        final var viewersGroup = projectAuthzService.createViewersGroup(tenantId, resourceId);
         authz.viewersGroup = new AuthzEntity(viewersGroup.getId(), viewersGroup.getName());
 
-        final var managersGroup = projectAuthzService.createManagersGroup(resourceId);
+        final var managersGroup = projectAuthzService.createManagersGroup(tenantId, resourceId);
         authz.managersGroup = new AuthzEntity(managersGroup.getId(), managersGroup.getName());
 
-        final var adminsGroup = projectAuthzService.createAdminsGroup(resourceId);
+        final var adminsGroup = projectAuthzService.createAdminsGroup(tenantId, resourceId);
         authz.adminsGroup = new AuthzEntity(adminsGroup.getId(), adminsGroup.getName());
 
         keycloakService.joinGroup(createdBy, adminsGroup);
