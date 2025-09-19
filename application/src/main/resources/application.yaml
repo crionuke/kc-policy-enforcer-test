@@ -1,0 +1,30 @@
+quarkus:
+  log:
+    category:
+      "io.quarkus.oidc":
+        level: DEBUG
+      "io.quarkus.keycloak":
+        level: DEBUG
+      "org.keycloak":
+        level: DEBUG
+  oidc:
+    auth-server-url: http://localhost:8000/realms/test
+    client-id: application
+    credentials:
+      secret: application
+  keycloak:
+    policy-enforcer:
+      enabled: true
+      lazy-load-paths: true
+      http-method-as-scope: false
+      path-cache:
+        lifespan: 1000
+        max-entries: 1000
+      paths:
+        tenant-resource:
+          path: /{ver}/tenants/{id}
+          methods:
+            get:
+              method: GET
+              scopes:
+                - admin
